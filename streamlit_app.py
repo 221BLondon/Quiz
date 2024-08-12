@@ -14,8 +14,8 @@ st.header('Quiz', divider='gray')
 st.title("Mock Exam")
     
     file_path = 'questions.csv'  # Path to your CSV file
-    df = load_questions(file_path)
-    
+    DATA_FILENAME = Path(__file__).parent/'data/cms.csv'
+    df = pd.read_csv(DATA_FILENAME)
     num_questions = len(df)
     correct_count = 0
     answers = []
