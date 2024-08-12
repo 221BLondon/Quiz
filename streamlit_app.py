@@ -1,15 +1,19 @@
-import pandas as pd
 import streamlit as st
+import pandas as pd
+import math
+from pathlib import Path
+# Set the title and favicon that appear in the Browser's tab bar.
+st.set_page_config(
+    page_title='Quiz',
+    page_icon=':earth_americas:', # This is an emoji shortcode. Could be a URL too.
+)
 
-# Load questions from CSV file
-def load_questions(file_path):
-    return pd.read_csv(file_path)
-
-# Streamlit app
-def main():
-    st.title("Mock Exam")
+# -----------------------------------------------------------------------------
+# Declare some useful functions.
+st.header('Quiz', divider='gray')
+st.title("Mock Exam")
     
-    file_path = 'https://docs.google.com/spreadsheets/d/1FpUvZMMIC2aFxxA4bmmSlPaVuBCY36aR8-qKWSKyrQ0/edit?usp=sharing'  # Path to your CSV file
+    file_path = 'questions.csv'  # Path to your CSV file
     df = load_questions(file_path)
     
     num_questions = len(df)
@@ -47,6 +51,3 @@ def main():
             st.write(f"**Your Answer:** {answer['User Answer']}")
             st.write(f"**Correct Answer:** {answer['Correct Answer']}")
             st.write(f"**Explanation:** {answer['Explanation']}")
-
-if __name__ == "__main__":
-    main()
