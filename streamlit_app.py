@@ -8,6 +8,7 @@ st.set_page_config(
     page_icon=':earth_americas:', # This is an emoji shortcode. Could be a URL too.
 )
 
+
 # -----------------------------------------------------------------------------
 # Declare some useful functions.
 st.header('Quiz', divider='gray')
