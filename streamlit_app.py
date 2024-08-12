@@ -14,38 +14,75 @@ st.header('Quiz', divider='gray')
 st.title("Mock Exam")
 DATA_FILENAME = Path(__file__).parent/'new.csv'
 df = pd.read_csv(DATA_FILENAME)
-num_questions = len(df)
-correct_count = 0
-answers = []
+if 'start' not in st.session_state:
+        st.session_state.start = False
+        st.session_state.current_question_index = 0
+        st.session_state.answers = []
+        st.session_state.correct_count = 0
 
-for index, row in df.iterrows():
-    st.subheader(f"Question {row['Question Number']}")
-    st.write(row['Question'])
-    options = [row['Option A'], row['Option B'], row['Option C'], row['Option D']]
-    user_answer = st.radio("Choose your answer:", options, key=index)
-    
-    if st.button("Submit Answer", key=f"submit_{index}"):
-        if user_answer == row['Correct Answer']:
-            st.success("Correct!")
-            correct_count += 1
-        else:
-            st.error(f"Wrong! The correct answer was {row['Correct Answer']}.")
-            st.info(f"Explanation: {row['Explanation']}")
+    def start_exam():
+        st.session_state.start = True
+        st.session_state.current_question_index = 0
+        st.session_state.answers = []
+        st.session_state.correct_count = 0
+
+    def stop_exam():
+        st.session_state.start = False
+
+    def next_question():
+        if st.session_state.current_question_index < len(df) - 1:
+            st.session_state.current_question_index += 1
+
+    def previous_question():
+        if st.session_state.current_question_index > 0:
+            st.session_state.current_question_index -= 1
+
+    if not st.session_state.start:
+        if st.button("Start Exam"):
+            start_exam()
+    else:
+        index = st.session_state.current_question_index
+        row = df.iloc[index]
         
-        answers.append({
-            'Question': row['Question'],
-            'User Answer': user_answer,
-            'Correct Answer': row['Correct Answer'],
-            'Explanation': row['Explanation']
-        })
+        st.subheader(f"Question {row['Question Number']}")
+        st.write(row['Question'])
+        options = [row['Option A'], row['Option B'], row['Option C'], row['Option D']]
+        user_answer = st.radio("Choose your answer:", options, key=index)
+        
+        if st.button("Submit Answer"):
+            if user_answer == row['Correct Answer']:
+                st.success("Correct!")
+                st.session_state.correct_count += 1
+            else:
+                st.error(f"Wrong! The correct answer was {row['Correct Answer']}.")
+                st.info(f"Explanation: {row['Explanation']}")
+            
+            st.session_state.answers.append({
+                'Question': row['Question'],
+                'User Answer': user_answer,
+                'Correct Answer': row['Correct Answer'],
+                'Explanation': row['Explanation']
+            })
 
-if st.button("Finish Exam"):
-    st.write(f"\nYou got {correct_count} out of {num_questions} questions right.")
-    st.write(f"Your score: {correct_count / num_questions * 100:.2f}%")
-    
-    st.subheader("Detailed Results:")
-    for answer in answers:
-        st.write(f"**Question:** {answer['Question']}")
-        st.write(f"**Your Answer:** {answer['User Answer']}")
-        st.write(f"**Correct Answer:** {answer['Correct Answer']}")
-        st.write(f"**Explanation:** {answer['Explanation']}")
+        # Navigation buttons
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col1:
+            if st.session_state.current_question_index > 0:
+                if st.button("Previous"):
+                    previous_question()
+        with col2:
+            if st.session_state.current_question_index < len(df) - 1:
+                if st.button("Next"):
+                    next_question()
+        with col3:
+            if st.button("Finish Exam"):
+                st.session_state.start = False
+                st.write(f"\nYou got {st.session_state.correct_count} out of {len(df)} questions right.")
+                st.write(f"Your score: {st.session_state.correct_count / len(df) * 100:.2f}%")
+                
+                st.subheader("Detailed Results:")
+                for answer in st.session_state.answers:
+                    st.write(f"**Question:** {answer['Question']}")
+                    st.write(f"**Your Answer:** {answer['User Answer']}")
+                    st.write(f"**Correct Answer:** {answer['Correct Answer']}")
+                    st.write(f"**Explanation:** {answer['Explanation']}")
