@@ -1,21 +1,17 @@
-import streamlit as st
 import pandas as pd
-import math
-from pathlib import Path
-# Set the title and favicon that appear in the Browser's tab bar.
-st.set_page_config(
-    page_title='Quiz',
-    page_icon=':earth_americas:', # This is an emoji shortcode. Could be a URL too.
-)
+import streamlit as st
 
+# Load questions from CSV file
+def load_questions(file_path):
+    return pd.read_csv(file_path)
 
-# -----------------------------------------------------------------------------
-# Declare some useful functions.
-st.header('Quiz', divider='gray')
-st.title("Mock Exam")
-DATA_FILENAME = Path(__file__).parent/'new.csv'
-df = pd.read_csv(DATA_FILENAME)
-if 'start' not in st.session_state:
+def main():
+    st.title("Mock Exam")
+
+    file_path = 'questions.csv'  # Path to your downloaded CSV file
+    df = load_questions(file_path)
+
+    if 'start' not in st.session_state:
         st.session_state.start = False
         st.session_state.current_question_index = 0
         st.session_state.answers = []
@@ -44,12 +40,12 @@ if 'start' not in st.session_state:
     else:
         index = st.session_state.current_question_index
         row = df.iloc[index]
-        
+
         st.subheader(f"Question {row['Question Number']}")
         st.write(row['Question'])
         options = [row['Option A'], row['Option B'], row['Option C'], row['Option D']]
         user_answer = st.radio("Choose your answer:", options, key=index)
-        
+
         if st.button("Submit Answer"):
             if user_answer == row['Correct Answer']:
                 st.success("Correct!")
@@ -57,7 +53,7 @@ if 'start' not in st.session_state:
             else:
                 st.error(f"Wrong! The correct answer was {row['Correct Answer']}.")
                 st.info(f"Explanation: {row['Explanation']}")
-            
+
             st.session_state.answers.append({
                 'Question': row['Question'],
                 'User Answer': user_answer,
@@ -80,10 +76,8 @@ if 'start' not in st.session_state:
                 st.session_state.start = False
                 st.write(f"\nYou got {st.session_state.correct_count} out of {len(df)} questions right.")
                 st.write(f"Your score: {st.session_state.correct_count / len(df) * 100:.2f}%")
-                
+
                 st.subheader("Detailed Results:")
                 for answer in st.session_state.answers:
                     st.write(f"**Question:** {answer['Question']}")
-                    st.write(f"**Your Answer:** {answer['User Answer']}")
-                    st.write(f"**Correct Answer:** {answer['Correct Answer']}")
-                    st.write(f"**Explanation:** {answer['Explanation']}")
+                    st.write(f"**Your Answer:** {answer['User Answer']
