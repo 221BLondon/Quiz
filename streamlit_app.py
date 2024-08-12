@@ -8,6 +8,7 @@ def load_questions(file_path):
     DATA_FILENAME = Path(__file__).parent/'new.csv'
     return pd.read_csv(DATA_FILENAME)
 
+
 def main():
     st.title("Mock Exam")
 
@@ -47,20 +48,27 @@ def main():
         st.subheader(f"Question {row['Question Number']}")
         st.write(row['Question'])
         options = [row['Option A'], row['Option B'], row['Option C'], row['Option D']]
+        option_keys = ['A', 'B', 'C', 'D']
+        
+        # Map options to keys
+        option_map = dict(zip(options, option_keys))
         user_answer = st.radio("Choose your answer:", options, key=index)
 
         if st.button("Submit Answer"):
-            if user_answer == row['Correct Answer']:
+            correct_answer_key = row['Correct Answer']
+            selected_option_key = option_map[user_answer]
+            
+            if selected_option_key == correct_answer_key:
                 st.success("Correct!")
                 st.session_state.correct_count += 1
             else:
-                st.error(f"Wrong! The correct answer was {row['Correct Answer']}.")
+                st.error(f"Wrong! The correct answer was {correct_answer_key}.")
                 st.info(f"Explanation: {row['Explanation']}")
 
             st.session_state.answers.append({
                 'Question': row['Question'],
-                'User Answer': user_answer,
-                'Correct Answer': row['Correct Answer'],
+                'User Answer': selected_option_key,
+                'Correct Answer': correct_answer_key,
                 'Explanation': row['Explanation']
             })
 
