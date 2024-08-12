@@ -3,7 +3,8 @@ import streamlit as st
 
 # Load questions from CSV file
 def load_questions(file_path):
-    return pd.read_csv(file_path)
+    DATA_FILENAME = Path(__file__).parent/'new.csv'
+    return pd.read_csv(DATA_FILENAME)
 
 def main():
     st.title("Mock Exam")
@@ -80,4 +81,9 @@ def main():
                 st.subheader("Detailed Results:")
                 for answer in st.session_state.answers:
                     st.write(f"**Question:** {answer['Question']}")
-                    st.write(f"**Your Answer:** {answer['User Answer']
+                    st.write(f"**Your Answer:** {answer['User Answer']}")
+                    st.write(f"**Correct Answer:** {answer['Correct Answer']}")
+                    st.write(f"**Explanation:** {answer['Explanation']}")
+
+if __name__ == "__main__":
+    main()
