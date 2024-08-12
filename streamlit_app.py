@@ -12,8 +12,6 @@ st.set_page_config(
 # Declare some useful functions.
 st.header('Quiz', divider='gray')
 st.title("Mock Exam")
-    
-    file_path = 'questions.csv'  # Path to your CSV file
     DATA_FILENAME = Path(__file__).parent/'new.csv'
     df = pd.read_csv(DATA_FILENAME)
     num_questions = len(df)
