@@ -3,7 +3,7 @@ import pandas as pd
 import math
 from pathlib import Path
 from question_loader import load_questions
-import plotly.graph_objects as go
+import altair as alt
 def previous_question():
     if st.session_state.current_question_index > 0:
         st.session_state.current_question_index -= 1
@@ -135,8 +135,20 @@ def main():
         st.write("# Exam Details")
         st.write(f"You have answered {st.session_state.correct_count} out of {len(df)} questions correctly.")
         st.write(f"Your score: {st.session_state.correct_count / len(df) * 100:.2f}%")
-        fig = go.Figure(data=[go.Pie(labels=['Correct', 'Incorrect'], values=[correct_answers, incorrect_answers], hole=0.3)])
-        st.plotly_chart(fig)
+        data = pd.DataFrame({
+            'Category': ['Correct', 'Incorrect'],
+            'Count': [correct_answers, incorrect_answers]
+        })
+
+        pie_chart = alt.Chart(data).mark_arc().encode(
+            theta=alt.Theta(field="Count", type="quantitative"),
+            color=alt.Color(field="Category", type="nominal"),
+            tooltip=['Category', 'Count']
+        ).properties(
+            title="Correct vs Incorrect Answers"
+        )
+
+        st.altair_chart(pie_chart, use_container_width=True)
         st.subheader("Detailed Results")
         for i, answer in enumerate(st.session_state.answers):
             if answer is not None:
