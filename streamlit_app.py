@@ -5,7 +5,8 @@ from pathlib import Path
 
 # Load questions from CSV file
 def load_questions(file_path):
-    return pd.read_csv(file_path)
+    DATA_FILENAME = Path(__file__).parent / 'new.csv'
+    return pd.read_csv(DATA_FILENAME)
 
 def main():
     st.title("Mock Exam")
