@@ -41,8 +41,8 @@ def main():
     def handle_answer(submitted_answer):
         index = st.session_state.current_question_index
         row = df.iloc[index]
-
-        if submitted_answer == row['Correct Answer']:
+        correct_answer_key = row['Correct Answer']
+        if submitted_answer == correct_answer_key:
             st.session_state.correct_count += 1
         st.session_state.answers[index] = submitted_answer
 
@@ -66,7 +66,8 @@ def main():
                     button_color = 'lightgreen' if st.session_state.answers[q_index] is not None else 'lightblue'
                     
                     with cols[i]:
-                        if st.button(btn_label, key=q_index, help=f"Go to Question {q_index + 1}", use_container_width=True, 
+                        if st.button(btn_label, key=q_index, help=f"Go to Question {q_index + 1}", 
+                                     use_container_width=True, 
                                      on_click=lambda idx=q_index: st.session_state.update({"current_question_index": idx})):
                             st.session_state.current_question_index = q_index
 
@@ -87,12 +88,14 @@ def main():
             options = [row['Option A'], row['Option B'], row['Option C'], row['Option D']]
             option_keys = ['A', 'B', 'C', 'D']
 
-            selected_answer = st.radio("Choose your answer:", options, key="options", index=options.index(st.session_state.answers[index]) if st.session_state.answers[index] else None)
+            selected_answer = st.radio("Choose your answer:", options, key="options", index=options.index(st.session_state.answers[index]) if st.session_state.answers[index] in options else None)
 
             if st.button("Submit Answer"):
-                handle_answer(option_keys[options.index(selected_answer)])
+                # Map options to keys for comparison
+                selected_answer_key = option_keys[options.index(selected_answer)]
+                handle_answer(selected_answer_key)
                 correct_answer_key = row['Correct Answer']
-                if option_keys[options.index(selected_answer)] == correct_answer_key:
+                if selected_answer_key == correct_answer_key:
                     st.success("Correct!")
                 else:
                     st.error(f"Wrong! The correct answer was {correct_answer_key}.")
@@ -111,6 +114,14 @@ def main():
             with col3:
                 if st.button("Finish Exam"):
                     stop_exam()
+                    # Show detailed results
+                    st.subheader("Detailed Results")
+                    for i, answer in enumerate(st.session_state.answers):
+                        if answer is not None:
+                            st.write(f"**Question {i + 1}:** {df.iloc[i]['Question']}")
+                            st.write(f"**Your Answer:** {answer}")
+                            st.write(f"**Correct Answer:** {df.iloc[i]['Correct Answer']}")
+                            st.write(f"**Explanation:** {df.iloc[i]['Explanation']}")
 
 if __name__ == "__main__":
     main()
