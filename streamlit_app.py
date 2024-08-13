@@ -85,17 +85,19 @@ def main():
         options = [row['Option A'], row['Option B'], row['Option C'], row['Option D']]
         option_keys = ['A', 'B', 'C', 'D']
 
-        # Create a radio button for answers with the previously selected answer preserved
-        previous_answer_key = st.session_state.answers[index]
-        previous_answer_index = option_keys.index(previous_answer_key) if previous_answer_key and previous_answer_key in option_keys else None
+        # Include a placeholder for no selection
+        options_with_placeholder = ["Select an option"] + options
+        option_keys_with_placeholder = [None] + option_keys
 
-        # Use a default option (like the first option) if there is no previous answer
-        default_index = previous_answer_index if previous_answer_index is not None else 0
-        selected_answer = st.radio("Choose your answer:", options, index=default_index)
+        # Determine the index of the previous answer if it exists
+        previous_answer_key = st.session_state.answers[index]
+        previous_answer_index = option_keys_with_placeholder.index(previous_answer_key) if previous_answer_key and previous_answer_key in option_keys_with_placeholder else 0
+
+        selected_answer = st.radio("Choose your answer:", options_with_placeholder, index=previous_answer_index)
 
         if st.button("Submit Answer"):
-            if selected_answer is not None:
-                selected_answer_key = option_keys[options.index(selected_answer)]
+            if selected_answer != "Select an option":
+                selected_answer_key = option_keys_with_placeholder[options_with_placeholder.index(selected_answer)]
                 handle_answer(selected_answer_key)
                 correct_answer_key = row['Correct Answer']
                 if selected_answer_key == correct_answer_key:
