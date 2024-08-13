@@ -5,8 +5,7 @@ from pathlib import Path
 
 # Load questions from CSV file
 def load_questions(file_path):
-    DATA_FILENAME = Path(__file__).parent / 'new.csv'
-    return pd.read_csv(DATA_FILENAME)
+    return pd.read_csv(file_path)
 
 def main():
     st.title("Mock Exam")
@@ -65,7 +64,8 @@ def main():
             options = [row['Option A'], row['Option B'], row['Option C'], row['Option D']]
             option_keys = ['A', 'B', 'C', 'D']
 
-            selected_answer = st.radio("Choose your answer:", options, key="options", index=options.index(st.session_state.answers[index]) if st.session_state.answers[index] in options else None)
+            # Create a selectbox for answers without default selection
+            selected_answer = st.radio("Choose your answer:", options, key="options", index=None if st.session_state.answers[index] is None else options.index(st.session_state.answers[index]))
 
             if st.button("Submit Answer"):
                 # Map options to keys for comparison
@@ -109,22 +109,23 @@ def main():
                     button_color = 'lightgreen' if st.session_state.answers[q_index] is not None else 'lightblue'
                     
                     with cols[i]:
-                        if st.button(btn_label, key=q_index, help=f"Go to Question {q_index + 1}", 
-                                     use_container_width=True,
-                                     on_click=lambda idx=q_index: st.session_state.update({"current_question_index": idx})):
+                        if st.button(btn_label, key=q_index, help=f"Go to Question {q_index + 1}",
+                                     use_container_width=True, on_click=lambda idx=q_index: st.session_state.update({"current_question_index": idx}),
+                                     args=(q_index,)):
                             st.session_state.current_question_index = q_index
 
-            if st.session_state.show_results:
-                st.subheader("Exam Details")
-                st.write(f"You have answered {st.session_state.correct_count} out of {len(df)} questions correctly.")
-                st.write(f"Your score: {st.session_state.correct_count / len(df) * 100:.2f}%")
-                st.subheader("Detailed Results")
-                for i, answer in enumerate(st.session_state.answers):
-                    if answer is not None:
-                        st.write(f"**Question {i + 1}:** {df.iloc[i]['Question']}")
-                        st.write(f"**Your Answer:** {answer}")
-                        st.write(f"**Correct Answer:** {df.iloc[i]['Correct Answer']}")
-                        st.write(f"**Explanation:** {df.iloc[i]['Explanation']}")
+    # Results and details at the bottom
+    if st.session_state.show_results:
+        st.subheader("Exam Details")
+        st.write(f"You have answered {st.session_state.correct_count} out of {len(df)} questions correctly.")
+        st.write(f"Your score: {st.session_state.correct_count / len(df) * 100:.2f}%")
+        st.subheader("Detailed Results")
+        for i, answer in enumerate(st.session_state.answers):
+            if answer is not None:
+                st.write(f"**Question {i + 1}:** {df.iloc[i]['Question']}")
+                st.write(f"**Your Answer:** {answer}")
+                st.write(f"**Correct Answer:** {df.iloc[i]['Correct Answer']}")
+                st.write(f"**Explanation:** {df.iloc[i]['Explanation']}")
 
 if __name__ == "__main__":
     main()
