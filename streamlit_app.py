@@ -55,13 +55,13 @@ def main():
                 total_questions = len(df)
                 rows = math.ceil(total_questions / 8)
                 for r in range(rows):
-                    cols = st.columns(8)
+                    cols = st.columns(8, gap="small")
                     for i in range(8):
                         q_index = r * 8 + i
                         if q_index >= total_questions:
                             break
-                        btn_label = f"Q{q_index + 1}"
-                        btn_color = "lightgreen" if st.session_state.answers[q_index] is not None else "lightcoral"
+                        btn_label = f"{q_index + 1}"
+                        btn_color = "lightblue" if st.session_state.answers[q_index] is not None else "lightgray"
                         # Use a markdown button for custom styling
                         st.markdown(f'''
                             <style>
@@ -69,9 +69,10 @@ def main():
                                     background-color: {btn_color};
                                     border: 1px solid #ddd;
                                     border-radius: 5px;
-                                    padding: 10px;
+                                    padding: 8px;
                                     color: black;
                                     margin: 2px;
+                                    font-size: 12px;
                                 }}
                                 .stButton button:hover {{
                                     background-color: {btn_color};
