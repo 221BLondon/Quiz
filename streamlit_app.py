@@ -2,16 +2,12 @@ import streamlit as st
 import pandas as pd
 import math
 from pathlib import Path
-
-# Load questions from CSV file
-def load_questions(file_path):
-    DATA_FILENAME = Path(__file__).parent / 'new.csv'
-    return pd.read_csv(DATA_FILENAME)
+from question_loader import load_questions  # Import the new question loading function
 
 def main():
     st.title("Mock Exam")
 
-    file_path = 'questions.csv'  # Path to your downloaded CSV file
+    file_path = 'new.csv'  # Path to your CSV file
     df = load_questions(file_path)
 
     # Initialize session state
@@ -80,39 +76,31 @@ def main():
                     st.info(f"Explanation: {row['Explanation']}")
 
             # Navigation buttons
-            col1, col2, col3 = st.columns([1, 2, 1])
-            with col1:
-                if st.session_state.current_question_index > 0:
-                    if st.button("Previous"):
-                        previous_question()
-            with col2:
-                if st.session_state.current_question_index < len(df) - 1:
-                    if st.button("Next"):
-                        next_question()
-            with col3:
-                if st.button("Finish Exam"):
-                    stop_exam()
+            st.button("Previous", on_click=previous_question, disabled=st.session_state.current_question_index == 0)
+            st.button("Next", on_click=next_question, disabled=st.session_state.current_question_index == len(df) - 1)
+            st.button("Finish Exam", on_click=stop_exam)
 
     with col2:
         st.subheader("Jump to Question")
         total_questions = len(df)
         num_rows = math.ceil(total_questions / 8)
-        
+
         for r in range(num_rows):
             cols = st.columns(8)
             for i in range(8):
                 q_index = r * 8 + i
                 if q_index >= total_questions:
                     break
-                
+
                 btn_label = str(q_index + 1)
                 button_color = 'lightgreen' if st.session_state.answers[q_index] is not None else 'lightblue'
                 
                 with cols[i]:
-                    if st.button(btn_label, key=q_index, help=f"Go to Question {q_index + 1}",
-                                 use_container_width=True, on_click=lambda idx=q_index: st.session_state.update({"current_question_index": idx}),
-                                 ) and st.session_state.answers[q_index] is not None:
+                    button = st.button(btn_label, key=q_index, help=f"Go to Question {q_index + 1}",
+                                      use_container_width=True, on_click=lambda idx=q_index: st.session_state.update({"current_question_index": idx}))
+                    if button and st.session_state.answers[q_index] is not None:
                         st.session_state.current_question_index = q_index
+                        st.experimental_rerun()  # Refresh to update the question view
 
     if st.session_state.show_results:
         st.write("# Exam Details")
