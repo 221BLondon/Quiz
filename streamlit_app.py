@@ -46,10 +46,26 @@ def main():
             st.session_state.correct_count += 1
         st.session_state.answers[index] = submitted_answer
 
-    # Layout
-    col1, col2 = st.columns([3, 1])
+    # Inject custom CSS to style the buttons in the sidebar
+    st.markdown(
+        """
+        <style>
+        .correct-button {
+            background-color: lightgreen !important;
+            color: black !important;
+        }
+        .incorrect-button {
+            background-color: lightblue !important;
+            color: black !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    
+    # Layout
+    col1, _ = st.columns([3, 1])  # Only one column since the sidebar is used
+
     with col1:
         if not st.session_state.start:
             if st.button("Start Exam"):
@@ -71,7 +87,7 @@ def main():
             
             # Set the default index for the radio button; if there's no previous answer, set index to None
             selected_answer = st.radio("Choose your answer:", options, 
-                                       index=previous_answer_index if previous_answer_index is not None else None)
+                                       index=previous_answer_index if previous_answer_index is not None else 0)
 
             # Add loader when submitting an answer
             if st.button("Submit Answer"):
@@ -94,7 +110,8 @@ def main():
             st.button("Next", on_click=next_question, disabled=st.session_state.current_question_index == len(df) - 1)
             st.button("Finish Exam", on_click=stop_exam)
 
-    with col2:
+    # Sidebar for "Jump to Question"
+    with st.sidebar:
         st.subheader("Jump to Question")
         total_questions = len(df)
         num_rows = math.ceil(total_questions / 8)
@@ -107,13 +124,17 @@ def main():
                     break
 
                 btn_label = str(q_index + 1)
-                button_color = 'lightgreen' if st.session_state.answers[q_index] is not None else 'lightblue'
+                
+                # Assign CSS classes to buttons based on whether the question has been answered
+                button_class = "correct-button" if st.session_state.answers[q_index] is not None else "incorrect-button"
                 
                 with cols[i]:
-                    button = st.button(btn_label, key=q_index, help=f"Go to Question {q_index + 1}",
-                                      use_container_width=True, on_click=lambda idx=q_index: st.session_state.update({"current_question_index": idx}))
-                    if button:
-                        st.session_state.current_question_index = q_index
+                    button_html = f"""
+                    <button class="{button_class}" style="width: 100%;" onClick="window.location.href='/#{q_index}'">
+                        {btn_label}
+                    </button>
+                    """
+                    st.markdown(button_html, unsafe_allow_html=True)
 
     if st.session_state.show_results:
         st.write("# Exam Details")
