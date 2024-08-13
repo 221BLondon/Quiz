@@ -89,7 +89,6 @@ def main():
                         with cols[i]:
                             if st.button(btn_label, key=f"btn_{q_index}"):
                                 go_to_question(q_index)
-                                st.experimental_rerun()
 
 
     if not st.session_state.start:
