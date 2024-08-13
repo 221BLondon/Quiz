@@ -3,10 +3,12 @@ import pandas as pd
 import math
 from pathlib import Path
 from question_loader import load_questions  # Import the new question loading function
+
 def previous_question():
     if st.session_state.current_question_index > 0:
         st.session_state.current_question_index -= 1
-        st.write(f"Moving to Question Index: {st.session_state.current_question_index}") 
+        st.write(f"Moving to Question Index: {st.session_state.current_question_index}")
+
 def main():
     st.title("Mock Exam")
 
@@ -61,20 +63,6 @@ def main():
             option_keys = ['A', 'B', 'C', 'D']
 
             # Create a radio button for answers with the previously selected answer preserved
-            # print(st.session_state.answers[index])
-            # y=option_keys.index(st.session_state.answers[index])
-            # print(options[y])
-            # z=options[y]
-            # previous_index = None if st.session_state.answers[index] is None else z)
-            # selected_answer = st.radio("Choose your answer:", options, key="options",
-            #                            index=previous_index)
-            # Create a radio button for answers with the previously selected answer preserved
-            # previous_answer_key = st.session_state.answers[index]
-            # previous_answer_index = option_keys.index(previous_answer_key) if previous_answer_key and (previous_answer_key in option_keys) else None
-            # st.write(options[previous_answer_index])
-            # selected_answer = st.radio("Choose your answer:", options,
-            #                            index=options[previous_answer_index] if previous_answer_index and (previous_answer_index in options) else None)
-            # Create a radio button for answers with the previously selected answer preserved
             previous_answer_key = st.session_state.answers[index]
             
             # Determine the index of the previous answer if it exists
@@ -87,19 +75,21 @@ def main():
             # Set the default index for the radio button; if there's no previous answer, don't set a default
             selected_answer = st.radio("Choose your answer:", options, index=previous_answer_index if previous_answer_index is not None else 0)
 
+            # Add loader when submitting an answer
             if st.button("Submit Answer"):
-                if selected_answer is not None:
-                    # Map options to keys for comparison
-                    selected_answer_key = option_keys[options.index(selected_answer)]
-                    handle_answer(selected_answer_key)
-                    correct_answer_key = row['Correct Answer']
-                    if selected_answer_key == correct_answer_key:
-                        st.success("Correct!")
+                with st.spinner('Submitting your answer...'):
+                    if selected_answer is not None:
+                        # Map options to keys for comparison
+                        selected_answer_key = option_keys[options.index(selected_answer)]
+                        handle_answer(selected_answer_key)
+                        correct_answer_key = row['Correct Answer']
+                        if selected_answer_key == correct_answer_key:
+                            st.success("Correct!")
+                        else:
+                            st.error(f"Wrong! The correct answer was {correct_answer_key}.")
+                            st.info(f"Explanation: {row['Explanation']}")
                     else:
-                        st.error(f"Wrong! The correct answer was {correct_answer_key}.")
-                        st.info(f"Explanation: {row['Explanation']}")
-                else:
-                    st.warning("Please select an answer before submitting.")
+                        st.warning("Please select an answer before submitting.")
 
             # Navigation buttons
             st.button("Previous", on_click=previous_question, disabled=st.session_state.current_question_index == 0)
