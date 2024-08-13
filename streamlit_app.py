@@ -65,9 +65,12 @@ def main():
             y=option_keys.index(st.session_state.answers[index])
             print(options[y])
             z=options[y]
-            previous_index = None if st.session_state.answers[index] is None else z)
-            selected_answer = st.radio("Choose your answer:", options, key="options",
-                                       index=previous_index)
+            # previous_index = None if st.session_state.answers[index] is None else z)
+            # selected_answer = st.radio("Choose your answer:", options, key="options",
+            #                            index=previous_index)
+            previous_answer = st.session_state.answers[index]
+            selected_answer = st.radio("Choose your answer:", options,
+                                       index=options.index(previous_answer) if previous_answer else None)
 
             if st.button("Submit Answer"):
                 # Map options to keys for comparison
