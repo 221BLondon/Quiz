@@ -61,8 +61,9 @@ def main():
             options = [row['Option A'], row['Option B'], row['Option C'], row['Option D']]
             option_keys = ['A', 'B', 'C', 'D']
 
-            # Create a selectbox for answers without default selection
-            selected_answer = st.radio("Choose your answer:", options, key="options", index=None if st.session_state.answers[index] is None else options.index(st.session_state.answers[index]))
+            # Create a radio button for answers with the previously selected answer preserved
+            selected_answer = st.radio("Choose your answer:", options, key="options",
+                                       index=None if st.session_state.answers[index] is None else options.index(st.session_state.answers[index]))
 
             if st.button("Submit Answer"):
                 # Map options to keys for comparison
@@ -98,7 +99,7 @@ def main():
                 with cols[i]:
                     button = st.button(btn_label, key=q_index, help=f"Go to Question {q_index + 1}",
                                       use_container_width=True, on_click=lambda idx=q_index: st.session_state.update({"current_question_index": idx}))
-                    if button and st.session_state.answers[q_index] is not None:
+                    if button:
                         st.session_state.current_question_index = q_index
                         st.experimental_rerun()  # Refresh to update the question view
 
