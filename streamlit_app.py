@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
-from pathlib import Path
 import math
+from pathlib import Path
+
 # Load questions from CSV file
 def load_questions(file_path):
     DATA_FILENAME = Path(__file__).parent / 'new.csv'
@@ -74,21 +75,24 @@ def main():
 
         # Map options to keys
         option_map = dict(zip(options, option_keys))
-        user_answer = st.radio("Choose your answer:", options, key=f"radio_{index}")
+        user_answer = st.radio("Choose your answer:", options, key=f"radio_{index}", index=None)  # No default selection
 
         if st.button("Submit Answer"):
-            correct_answer_key = row['Correct Answer']
-            selected_option_key = option_map[user_answer]
+            if user_answer:  # Only process if an answer was selected
+                correct_answer_key = row['Correct Answer']
+                selected_option_key = option_map[user_answer]
 
-            if selected_option_key == correct_answer_key:
-                st.success("Correct!")
-                st.session_state.correct_count += 1
+                if selected_option_key == correct_answer_key:
+                    st.success("Correct!")
+                    st.session_state.correct_count += 1
+                else:
+                    st.error(f"Wrong! The correct answer was {correct_answer_key}.")
+                    st.info(f"Explanation: {row['Explanation']}")
+
+                # Save the user's answer
+                st.session_state.answers[index] = selected_option_key
             else:
-                st.error(f"Wrong! The correct answer was {correct_answer_key}.")
-                st.info(f"Explanation: {row['Explanation']}")
-
-            # Save the user's answer
-            st.session_state.answers[index] = selected_option_key
+                st.warning("Please select an answer before submitting.")
 
         # Navigation buttons
         col1, col2, col3 = st.columns([1, 2, 1])
@@ -107,7 +111,7 @@ def main():
                 st.write(f"Your score: {st.session_state.correct_count / len(df) * 100:.2f}%")
 
                 st.subheader("Detailed Results:")
-                for i, answer in enumerate(st.session_state.answers):
+                for i, answer in st.session_state.answers:
                     st.write(f"**Question {i+1}:** {df.iloc[i]['Question']}")
                     st.write(f"**Your Answer:** {answer}")
                     st.write(f"**Correct Answer:** {df.iloc[i]['Correct Answer']}")
