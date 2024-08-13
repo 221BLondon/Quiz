@@ -135,11 +135,18 @@ def main():
         st.write("# Exam Details")
         st.write(f"You have answered {st.session_state.correct_count} out of {len(df)} questions correctly.")
         st.write(f"Your score: {st.session_state.correct_count / len(df) * 100:.2f}%")
+
+        # Define the variables
+        correct_answers = st.session_state.correct_count
+        incorrect_answers = len(df) - correct_answers
+
+        # Create the pie chart data
         data = pd.DataFrame({
             'Category': ['Correct', 'Incorrect'],
             'Count': [correct_answers, incorrect_answers]
         })
 
+        # Generate the pie chart using Altair
         pie_chart = alt.Chart(data).mark_arc().encode(
             theta=alt.Theta(field="Count", type="quantitative"),
             color=alt.Color(field="Category", type="nominal"),
@@ -149,6 +156,7 @@ def main():
         )
 
         st.altair_chart(pie_chart, use_container_width=True)
+
         st.subheader("Detailed Results")
         for i, answer in enumerate(st.session_state.answers):
             if answer is not None:
@@ -156,7 +164,7 @@ def main():
                 st.write(f"**Your Answer:** {answer}")
                 st.write(f"**Correct Answer:** {df.iloc[i]['Correct Answer']}")
                 st.write(f"**Explanation:** {df.iloc[i]['Explanation']}")
-                
+
 
 if __name__ == "__main__":
     main()
