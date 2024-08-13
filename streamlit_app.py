@@ -1,13 +1,11 @@
 import streamlit as st
 import pandas as pd
-import math
 from pathlib import Path
 
 # Load questions from CSV file
 def load_questions(file_path):
-    DATA_FILENAME = Path(__file__).parent/'new.csv'
+    DATA_FILENAME = Path(__file__).parent / 'new.csv'
     return pd.read_csv(DATA_FILENAME)
-
 
 def main():
     st.title("Mock Exam")
@@ -18,13 +16,13 @@ def main():
     if 'start' not in st.session_state:
         st.session_state.start = False
         st.session_state.current_question_index = 0
-        st.session_state.answers = []
+        st.session_state.answers = [None] * len(df)
         st.session_state.correct_count = 0
 
     def start_exam():
         st.session_state.start = True
         st.session_state.current_question_index = 0
-        st.session_state.answers = []
+        st.session_state.answers = [None] * len(df)
         st.session_state.correct_count = 0
 
     def stop_exam():
@@ -38,6 +36,9 @@ def main():
         if st.session_state.current_question_index > 0:
             st.session_state.current_question_index -= 1
 
+    def go_to_question(index):
+        st.session_state.current_question_index = index
+
     if not st.session_state.start:
         if st.button("Start Exam"):
             start_exam()
@@ -45,19 +46,34 @@ def main():
         index = st.session_state.current_question_index
         row = df.iloc[index]
 
+        # Display question navigation buttons
+        st.subheader("Question Navigation")
+        cols = st.columns(len(df))
+        for i in range(len(df)):
+            btn_label = f"Q{i+1}"
+            if st.session_state.answers[i] is not None:
+                # Color the button green if the question has been answered
+                with cols[i]:
+                    if st.button(btn_label, key=f"btn_{i}", help="Answered", args=(i,)):
+                        go_to_question(i)
+            else:
+                with cols[i]:
+                    if st.button(btn_label, key=f"btn_{i}", args=(i,)):
+                        go_to_question(i)
+
         st.subheader(f"Question {row['Question Number']}")
         st.write(row['Question'])
         options = [row['Option A'], row['Option B'], row['Option C'], row['Option D']]
         option_keys = ['A', 'B', 'C', 'D']
-        
+
         # Map options to keys
         option_map = dict(zip(options, option_keys))
-        user_answer = st.radio("Choose your answer:", options, key=index)
+        user_answer = st.radio("Choose your answer:", options, key=f"radio_{index}")
 
         if st.button("Submit Answer"):
             correct_answer_key = row['Correct Answer']
             selected_option_key = option_map[user_answer]
-            
+
             if selected_option_key == correct_answer_key:
                 st.success("Correct!")
                 st.session_state.correct_count += 1
@@ -65,12 +81,8 @@ def main():
                 st.error(f"Wrong! The correct answer was {correct_answer_key}.")
                 st.info(f"Explanation: {row['Explanation']}")
 
-            st.session_state.answers.append({
-                'Question': row['Question'],
-                'User Answer': selected_option_key,
-                'Correct Answer': correct_answer_key,
-                'Explanation': row['Explanation']
-            })
+            # Save the user's answer
+            st.session_state.answers[index] = selected_option_key
 
         # Navigation buttons
         col1, col2, col3 = st.columns([1, 2, 1])
@@ -89,11 +101,11 @@ def main():
                 st.write(f"Your score: {st.session_state.correct_count / len(df) * 100:.2f}%")
 
                 st.subheader("Detailed Results:")
-                for answer in st.session_state.answers:
-                    st.write(f"**Question:** {answer['Question']}")
-                    st.write(f"**Your Answer:** {answer['User Answer']}")
-                    st.write(f"**Correct Answer:** {answer['Correct Answer']}")
-                    st.write(f"**Explanation:** {answer['Explanation']}")
+                for i, answer in enumerate(st.session_state.answers):
+                    st.write(f"**Question {i+1}:** {df.iloc[i]['Question']}")
+                    st.write(f"**Your Answer:** {answer}")
+                    st.write(f"**Correct Answer:** {df.iloc[i]['Correct Answer']}")
+                    st.write(f"**Explanation:** {df.iloc[i]['Explanation']}")
 
 if __name__ == "__main__":
     main()
