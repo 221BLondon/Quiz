@@ -49,6 +49,7 @@ def main():
     # Layout
     col1, col2 = st.columns([3, 1])
 
+    
     with col1:
         if not st.session_state.start:
             if st.button("Start Exam"):
