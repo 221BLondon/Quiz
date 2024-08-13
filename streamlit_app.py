@@ -64,7 +64,8 @@ def main():
             print(st.session_state.answers[index])
             y=option_keys.index(st.session_state.answers[index])
             print(options[y])
-            previous_index = None if st.session_state.answers[index] is None else options[option_keys.index(st.session_state.answers[index])])
+            z=options[y]
+            previous_index = None if st.session_state.answers[index] is None else z)
             selected_answer = st.radio("Choose your answer:", options, key="options",
                                        index=previous_index)
 
