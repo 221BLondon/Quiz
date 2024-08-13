@@ -46,17 +46,17 @@ def main():
             st.session_state.correct_count += 1
         st.session_state.answers[index] = submitted_answer
 
-    # Main layout
+    # Main layout with sidebar
     col1, col2 = st.columns([2, 1])
 
     with col2:
         if st.session_state.start:
-            st.subheader("Jump to Question")
+            st.sidebar.subheader("Jump to Question")
             total_questions = len(df)
             num_rows = math.ceil(total_questions / 8)
             
             for r in range(num_rows):
-                cols = st.columns(8)
+                cols = st.sidebar.columns(8)
                 for i in range(8):
                     q_index = r * 8 + i
                     if q_index >= total_questions:
@@ -66,12 +66,13 @@ def main():
                     button_color = 'lightgreen' if st.session_state.answers[q_index] is not None else 'lightblue'
                     
                     with cols[i]:
-                        if st.button(btn_label, key=q_index, help=f"Go to Question {q_index + 1}", use_container_width=True):
+                        if st.button(btn_label, key=q_index, help=f"Go to Question {q_index + 1}", use_container_width=True, 
+                                     on_click=lambda idx=q_index: st.session_state.update({"current_question_index": idx})):
                             st.session_state.current_question_index = q_index
 
-            st.subheader("Exam Details")
-            st.write(f"You have answered {st.session_state.correct_count} out of {len(df)} questions correctly.")
-            st.write(f"Your score: {st.session_state.correct_count / len(df) * 100:.2f}%")
+            st.sidebar.subheader("Exam Details")
+            st.sidebar.write(f"You have answered {st.session_state.correct_count} out of {len(df)} questions correctly.")
+            st.sidebar.write(f"Your score: {st.session_state.correct_count / len(df) * 100:.2f}%")
 
     with col1:
         if not st.session_state.start:
@@ -86,7 +87,7 @@ def main():
             options = [row['Option A'], row['Option B'], row['Option C'], row['Option D']]
             option_keys = ['A', 'B', 'C', 'D']
 
-            selected_answer = st.radio("Choose your answer:", options, key="options")
+            selected_answer = st.radio("Choose your answer:", options, key="options", index=options.index(st.session_state.answers[index]) if st.session_state.answers[index] else None)
 
             if st.button("Submit Answer"):
                 handle_answer(option_keys[options.index(selected_answer)])
