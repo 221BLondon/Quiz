@@ -75,15 +75,18 @@ def main():
                                        index=options[previous_answer_index] if previous_answer_index in options else None)
 
             if st.button("Submit Answer"):
-                # Map options to keys for comparison
-                selected_answer_key = option_keys[options.index(selected_answer)]
-                handle_answer(selected_answer_key)
-                correct_answer_key = row['Correct Answer']
-                if selected_answer_key == correct_answer_key:
-                    st.success("Correct!")
+                if selected_answer is not None:
+                    # Map options to keys for comparison
+                    selected_answer_key = option_keys[options.index(selected_answer)]
+                    handle_answer(selected_answer_key)
+                    correct_answer_key = row['Correct Answer']
+                    if selected_answer_key == correct_answer_key:
+                        st.success("Correct!")
+                    else:
+                        st.error(f"Wrong! The correct answer was {correct_answer_key}.")
+                        st.info(f"Explanation: {row['Explanation']}")
                 else:
-                    st.error(f"Wrong! The correct answer was {correct_answer_key}.")
-                    st.info(f"Explanation: {row['Explanation']}")
+                    st.warning("Please select an answer before submitting.")
 
             # Navigation buttons
             st.button("Previous", on_click=previous_question, disabled=st.session_state.current_question_index == 0)
