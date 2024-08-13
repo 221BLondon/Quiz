@@ -3,7 +3,10 @@ import pandas as pd
 import math
 from pathlib import Path
 from question_loader import load_questions  # Import the new question loading function
-
+def previous_question():
+    if st.session_state.current_question_index > 0:
+        st.session_state.current_question_index -= 1
+        st.write(f"Moving to Question Index: {st.session_state.current_question_index}") 
 def main():
     st.title("Mock Exam")
 
@@ -32,10 +35,6 @@ def main():
     def next_question():
         if st.session_state.current_question_index < len(df) - 1:
             st.session_state.current_question_index += 1
-
-    def previous_question():
-        if st.session_state.current_question_index > 0:
-            st.session_state.current_question_index -= 1
 
     def handle_answer(submitted_answer):
         index = st.session_state.current_question_index
