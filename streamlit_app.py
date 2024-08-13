@@ -71,6 +71,7 @@ def main():
             # Create a radio button for answers with the previously selected answer preserved
             previous_answer_key = st.session_state.answers[index]
             previous_answer_index = option_keys.index(previous_answer_key) if previous_answer_key in option_keys else None
+            st.write(options[previous_answer_index])
             selected_answer = st.radio("Choose your answer:", options,
                                        index=options[previous_answer_index] if previous_answer_index in options else None)
 
