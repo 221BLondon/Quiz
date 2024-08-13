@@ -68,12 +68,9 @@ def main():
             # Determine the index of the previous answer if it exists
             previous_answer_index = option_keys.index(previous_answer_key) if previous_answer_key else None
             
-            # Conditionally write the previous answer if it exists
-            if previous_answer_index is not None:
-                st.write(options[previous_answer_index])
-            
-            # Set the default index for the radio button; if there's no previous answer, don't set a default
-            selected_answer = st.radio("Choose your answer:", options, index=previous_answer_index if previous_answer_index is not None else 0)
+            # Set the default index for the radio button; if there's no previous answer, set index to None
+            selected_answer = st.radio("Choose your answer:", options, 
+                                       index=previous_answer_index if previous_answer_index is not None else None)
 
             # Add loader when submitting an answer
             if st.button("Submit Answer"):
