@@ -46,20 +46,26 @@ def main():
         index = st.session_state.current_question_index
         row = df.iloc[index]
 
-        # Display question navigation buttons
+        # Display question navigation buttons in rows of 8 columns
         st.subheader("Question Navigation")
-        cols = st.columns(len(df))
-        for i in range(len(df)):
-            btn_label = f"Q{i+1}"
-            if st.session_state.answers[i] is not None:
-                # Color the button green if the question has been answered
+        total_questions = len(df)
+        rows = math.ceil(total_questions / 8)
+        
+        for r in range(rows):
+            cols = st.columns(8)
+            for i in range(8):
+                q_index = r * 8 + i
+                if q_index >= total_questions:
+                    break
+                btn_label = f"Q{q_index + 1}"
                 with cols[i]:
-                    if st.button(btn_label, key=f"btn_{i}", help="Answered", args=(i,)):
-                        go_to_question(i)
-            else:
-                with cols[i]:
-                    if st.button(btn_label, key=f"btn_{i}", args=(i,)):
-                        go_to_question(i)
+                    if st.session_state.answers[q_index] is not None:
+                        # Color the button green if the question has been answered
+                        if st.button(btn_label, key=f"btn_{q_index}", help="Answered", args=(q_index,)):
+                            go_to_question(q_index)
+                    else:
+                        if st.button(btn_label, key=f"btn_{q_index}", args=(q_index,)):
+                            go_to_question(q_index)
 
         st.subheader(f"Question {row['Question Number']}")
         st.write(row['Question'])
