@@ -3,7 +3,7 @@ import pandas as pd
 import math
 from pathlib import Path
 from question_loader import load_questions
-
+import plotly.graph_objects as go
 def previous_question():
     if st.session_state.current_question_index > 0:
         st.session_state.current_question_index -= 1
@@ -135,6 +135,8 @@ def main():
         st.write("# Exam Details")
         st.write(f"You have answered {st.session_state.correct_count} out of {len(df)} questions correctly.")
         st.write(f"Your score: {st.session_state.correct_count / len(df) * 100:.2f}%")
+        fig = go.Figure(data=[go.Pie(labels=['Correct', 'Incorrect'], values=[correct_answers, incorrect_answers], hole=0.3)])
+        st.plotly_chart(fig)
         st.subheader("Detailed Results")
         for i, answer in enumerate(st.session_state.answers):
             if answer is not None:
@@ -142,6 +144,7 @@ def main():
                 st.write(f"**Your Answer:** {answer}")
                 st.write(f"**Correct Answer:** {df.iloc[i]['Correct Answer']}")
                 st.write(f"**Explanation:** {df.iloc[i]['Explanation']}")
+                
 
 if __name__ == "__main__":
     main()
