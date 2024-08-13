@@ -68,9 +68,10 @@ def main():
             # previous_index = None if st.session_state.answers[index] is None else z)
             # selected_answer = st.radio("Choose your answer:", options, key="options",
             #                            index=previous_index)
+            # Create a radio button for answers with the previously selected answer preserved
             previous_answer = st.session_state.answers[index]
             selected_answer = st.radio("Choose your answer:", options,
-                                       index=options.index(previous_answer) if previous_answer else None)
+                                       index=options.index(previous_answer) if previous_answer in options else None)
 
             if st.button("Submit Answer"):
                 # Map options to keys for comparison
