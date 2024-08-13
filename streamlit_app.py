@@ -33,7 +33,22 @@ def handle_answer(submitted_answer):
     if submitted_answer == correct_answer_key:
         st.session_state.correct_count += 1
     st.session_state.answers[index] = submitted_answer
-
+# Inject custom CSS to style the buttons in the sidebar
+st.markdown(
+    """
+    <style>
+    .correct-button {
+        background-color: lightgreen !important;
+        color: black !important;
+    }
+    .incorrect-button {
+        background-color: lightblue !important;
+        color: black !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 def main():
     st.title("Mock Exam")
 
