@@ -62,10 +62,10 @@ def main():
                 with cols[i]:
                     if st.session_state.answers[q_index] is not None:
                         # Color the button green if the question has been answered
-                        if st.button(btn_label, key=f"btn_{q_index}", help="Answered", args=(q_index,)):
+                        if st.button(btn_label, key=f"btn_{q_index}", help="Answered"):
                             go_to_question(q_index)
                     else:
-                        if st.button(btn_label, key=f"btn_{q_index}", args=(q_index,)):
+                        if st.button(btn_label, key=f"btn_{q_index}"):
                             go_to_question(q_index)
 
         st.subheader(f"Question {row['Question Number']}")
@@ -111,11 +111,12 @@ def main():
                 st.write(f"Your score: {st.session_state.correct_count / len(df) * 100:.2f}%")
 
                 st.subheader("Detailed Results:")
-                for i, answer in st.session_state.answers:
-                    st.write(f"**Question {i+1}:** {df.iloc[i]['Question']}")
-                    st.write(f"**Your Answer:** {answer}")
-                    st.write(f"**Correct Answer:** {df.iloc[i]['Correct Answer']}")
-                    st.write(f"**Explanation:** {df.iloc[i]['Explanation']}")
+                for i, answer in enumerate(st.session_state.answers):
+                    if answer is not None:
+                        st.write(f"**Question {i+1}:** {df.iloc[i]['Question']}")
+                        st.write(f"**Your Answer:** {answer}")
+                        st.write(f"**Correct Answer:** {df.iloc[i]['Correct Answer']}")
+                        st.write(f"**Explanation:** {df.iloc[i]['Explanation']}")
 
 if __name__ == "__main__":
     main()
