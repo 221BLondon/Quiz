@@ -9,7 +9,7 @@ def load_questions(file_path):
     return pd.read_csv(DATA_FILENAME)
 
 def main():
-    st.title("Mock Exam")
+    st.title("Interactive Mock Exam")
 
     file_path = 'questions.csv'  # Path to your downloaded CSV file
     df = load_questions(file_path)
@@ -40,36 +40,33 @@ def main():
     def go_to_question(index):
         st.session_state.current_question_index = index
 
+    # Header section
+    st.header("Welcome to Your Mock Exam")
+    
     if not st.session_state.start:
         if st.button("Start Exam"):
             start_exam()
     else:
+        st.button("Stop Exam", on_click=stop_exam)
+
+        # Question Navigation
+        with st.expander("Jump to a Question", expanded=True):
+            st.subheader("Navigation")
+            tabs = st.tabs([f"Q{i + 1}" for i in range(len(df))])
+            for i in range(len(df)):
+                with tabs[i]:
+                    if st.session_state.answers[i] is not None:
+                        color = "green"
+                    else:
+                        color = "red"
+                    st.markdown(f"<div style='background-color:{color}; color:white; padding:10px; text-align:center;'>Question {i + 1}</div>", unsafe_allow_html=True)
+                    st.button(f"Go to Question {i + 1}", key=f"go_to_{i}", on_click=go_to_question, args=(i,))
+
+        # Display current question
         index = st.session_state.current_question_index
         row = df.iloc[index]
 
-        # Display question navigation buttons in rows of 8 columns
-        st.subheader("Question Navigation")
-        total_questions = len(df)
-        rows = math.ceil(total_questions / 8)
-        
-        for r in range(rows):
-            cols = st.columns(8)
-            for i in range(8):
-                q_index = r * 8 + i
-                if q_index >= total_questions:
-                    break
-                btn_label = f"Q{q_index + 1}"
-                with cols[i]:
-                    if st.session_state.answers[q_index] is not None:
-                        # Color the button green if the question has been answered
-                        if st.button(btn_label, key=f"btn_{q_index}", help="Answered"):
-                            go_to_question(q_index)
-                    else:
-                        if st.button(btn_label, key=f"btn_{q_index}"):
-                            go_to_question(q_index)
-
-        st.subheader(f"Question {row['Question Number']}")
-        st.write(row['Question'])
+        st.subheader(f"Question {index + 1}: {row['Question']}")
         options = [row['Option A'], row['Option B'], row['Option C'], row['Option D']]
         option_keys = ['A', 'B', 'C', 'D']
 
@@ -98,25 +95,24 @@ def main():
         col1, col2, col3 = st.columns([1, 2, 1])
         with col1:
             if st.session_state.current_question_index > 0:
-                if st.button("Previous"):
-                    previous_question()
+                st.button("Previous", on_click=previous_question)
         with col2:
             if st.session_state.current_question_index < len(df) - 1:
-                if st.button("Next"):
-                    next_question()
+                st.button("Next", on_click=next_question)
         with col3:
             if st.button("Finish Exam"):
                 st.session_state.start = False
                 st.write(f"\nYou got {st.session_state.correct_count} out of {len(df)} questions right.")
                 st.write(f"Your score: {st.session_state.correct_count / len(df) * 100:.2f}%")
 
-                st.subheader("Detailed Results:")
-                for i, answer in enumerate(st.session_state.answers):
-                    if answer is not None:
-                        st.write(f"**Question {i+1}:** {df.iloc[i]['Question']}")
-                        st.write(f"**Your Answer:** {answer}")
-                        st.write(f"**Correct Answer:** {df.iloc[i]['Correct Answer']}")
-                        st.write(f"**Explanation:** {df.iloc[i]['Explanation']}")
+                # Show detailed results
+                with st.expander("View Detailed Results"):
+                    for i, answer in enumerate(st.session_state.answers):
+                        if answer is not None:
+                            st.write(f"**Question {i + 1}:** {df.iloc[i]['Question']}")
+                            st.write(f"**Your Answer:** {answer}")
+                            st.write(f"**Correct Answer:** {df.iloc[i]['Correct Answer']}")
+                            st.write(f"**Explanation:** {df.iloc[i]['Explanation']}")
 
 if __name__ == "__main__":
     main()
