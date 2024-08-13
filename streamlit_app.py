@@ -61,17 +61,18 @@ def main():
             option_keys = ['A', 'B', 'C', 'D']
 
             # Create a radio button for answers with the previously selected answer preserved
-            print(st.session_state.answers[index])
-            y=option_keys.index(st.session_state.answers[index])
-            print(options[y])
-            z=options[y]
+            # print(st.session_state.answers[index])
+            # y=option_keys.index(st.session_state.answers[index])
+            # print(options[y])
+            # z=options[y]
             # previous_index = None if st.session_state.answers[index] is None else z)
             # selected_answer = st.radio("Choose your answer:", options, key="options",
             #                            index=previous_index)
             # Create a radio button for answers with the previously selected answer preserved
-            previous_answer = st.session_state.answers[index]
+            previous_answer_key = st.session_state.answers[index]
+            previous_answer_index = option_keys.index(previous_answer_key)
             selected_answer = st.radio("Choose your answer:", options,
-                                       index=options.index(previous_answer) if previous_answer in options else None)
+                                       index=options[previous_answer_index] if previous_answer in options else None)
 
             if st.button("Submit Answer"):
                 # Map options to keys for comparison
