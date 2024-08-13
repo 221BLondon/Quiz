@@ -72,7 +72,7 @@ def main():
             previous_answer_key = st.session_state.answers[index]
             previous_answer_index = option_keys.index(previous_answer_key) if previous_answer_key in option_keys else None
             selected_answer = st.radio("Choose your answer:", options,
-                                       index=options[previous_answer_index] if previous_answer in options else None)
+                                       index=options[previous_answer_index] if previous_answer_index in options else None)
 
             if st.button("Submit Answer"):
                 # Map options to keys for comparison
