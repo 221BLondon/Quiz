@@ -11,6 +11,8 @@ def previous_question():
 def next_question():
     if st.session_state.current_question_index < len(df) - 1:
         st.session_state.current_question_index += 1
+def go_to_question(index):
+    st.session_state.current_question_index = index
 
 def start_exam():
     st.session_state.start = True
@@ -92,7 +94,7 @@ def main():
                         
                         with cols[i]:
                             button_html = f"""
-                            <button class="{button_class}" style="width: 100%;" onClick="window.location.href='/#{q_index}'">
+                            <button class="{button_class}" style="width: 100%;" onClick="go_to_question({q_index})">
                                 {btn_label}
                             </button>
                             """
