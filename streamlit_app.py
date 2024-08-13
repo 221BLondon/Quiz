@@ -84,10 +84,10 @@ def main():
                             break
                 
                         btn_label = str(q_index + 1)
-                        button_color = 'lightgreen' if st.session_state.answers[q_index] is not None else 'lightblue'
+                        button_type = 'primary' if st.session_state.answers[q_index] is not None else 'lightblue'
                 
                         with cols[i]:
-                            if st.button(btn_label, key=f"btn_{q_index}"):
+                            if st.button(btn_label, key=f"btn_{q_index}" ,type=f"{button_type}"):
                                 go_to_question(q_index)
 
 
