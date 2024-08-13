@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import math
 from pathlib import Path
 
 # Load questions from CSV file
@@ -70,6 +71,7 @@ def main():
                                     border-radius: 5px;
                                     padding: 10px;
                                     color: black;
+                                    margin: 2px;
                                 }}
                                 .stButton button:hover {{
                                     background-color: {btn_color};
