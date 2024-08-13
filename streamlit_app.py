@@ -69,11 +69,23 @@ def main():
             # selected_answer = st.radio("Choose your answer:", options, key="options",
             #                            index=previous_index)
             # Create a radio button for answers with the previously selected answer preserved
+            # previous_answer_key = st.session_state.answers[index]
+            # previous_answer_index = option_keys.index(previous_answer_key) if previous_answer_key and (previous_answer_key in option_keys) else None
+            # st.write(options[previous_answer_index])
+            # selected_answer = st.radio("Choose your answer:", options,
+            #                            index=options[previous_answer_index] if previous_answer_index and (previous_answer_index in options) else None)
+            # Create a radio button for answers with the previously selected answer preserved
             previous_answer_key = st.session_state.answers[index]
-            previous_answer_index = option_keys.index(previous_answer_key) if previous_answer_key and (previous_answer_key in option_keys) else None
-            st.write(options[previous_answer_index])
-            selected_answer = st.radio("Choose your answer:", options,
-                                       index=options[previous_answer_index] if previous_answer_index and (previous_answer_index in options) else None)
+            
+            # Determine the index of the previous answer if it exists
+            previous_answer_index = option_keys.index(previous_answer_key) if previous_answer_key else None
+            
+            # Conditionally write the previous answer if it exists
+            if previous_answer_index is not None:
+                st.write(options[previous_answer_index])
+            
+            # Set the default index for the radio button; if there's no previous answer, don't set a default
+            selected_answer = st.radio("Choose your answer:", options, index=previous_answer_index if previous_answer_index is not None else 0)
 
             if st.button("Submit Answer"):
                 if selected_answer is not None:
