@@ -126,7 +126,6 @@ def main():
                                       use_container_width=True, on_click=lambda idx=q_index: st.session_state.update({"current_question_index": idx}))
                     if button:
                         st.session_state.current_question_index = q_index
-                        st.experimental_rerun()  # Refresh to update the question view
 
     if st.session_state.show_results:
         st.write("# Exam Details")
