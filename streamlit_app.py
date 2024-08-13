@@ -51,14 +51,34 @@ def main():
 
             # Collapsible Jump to Question Section
             with st.expander("Jump to a Question"):
-                cols = st.columns(8)
-                for i in range(len(df)):
-                    col = cols[i % 8]
-                    answered = st.session_state.answers[i] is not None
-                    button_color = "lightgreen" if answered else "lightcoral"
-                    button = col.button(f"Q{i + 1}", key=f"nav_{i}", help=f"Go to Question {i + 1}", on_click=go_to_question, args=(i,))
-                    if answered:
-                        st.markdown(f'<style>#{button.id} {{ background-color: {button_color}; }}</style>', unsafe_allow_html=True)
+                total_questions = len(df)
+                rows = math.ceil(total_questions / 8)
+                for r in range(rows):
+                    cols = st.columns(8)
+                    for i in range(8):
+                        q_index = r * 8 + i
+                        if q_index >= total_questions:
+                            break
+                        btn_label = f"Q{q_index + 1}"
+                        btn_color = "lightgreen" if st.session_state.answers[q_index] is not None else "lightcoral"
+                        # Use a markdown button for custom styling
+                        st.markdown(f'''
+                            <style>
+                                .stButton button {{
+                                    background-color: {btn_color};
+                                    border: 1px solid #ddd;
+                                    border-radius: 5px;
+                                    padding: 10px;
+                                    color: black;
+                                }}
+                                .stButton button:hover {{
+                                    background-color: {btn_color};
+                                }}
+                            </style>
+                            ''', unsafe_allow_html=True)
+                        with cols[i]:
+                            if st.button(btn_label, key=f"nav_{q_index}"):
+                                go_to_question(q_index)
 
             # Detailed Results
             if st.session_state.start and st.button("Finish Exam"):
