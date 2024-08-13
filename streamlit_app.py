@@ -82,23 +82,15 @@ def main():
                         q_index = r * 8 + i
                         if q_index >= total_questions:
                             break
-
+                
                         btn_label = str(q_index + 1)
-                        # button_color = 'lightgreen' if st.session_state.answers[q_index] is not None else 'lightblue'
-
-                        # with cols[i]:
-                        #     st.button(btn_label, key=q_index, help=f"Go to Question {q_index + 1}",
-                        #               use_container_width=True, on_click=lambda idx=q_index: st.session_state.update({"current_question_index": idx}))
-                        # # Assign CSS classes to buttons based on whether the question has been answered
-                        button_class = "correct-button" if st.session_state.answers[q_index] is not None else "incorrect-button"
-                        
+                        button_color = 'lightgreen' if st.session_state.answers[q_index] is not None else 'lightblue'
+                
                         with cols[i]:
-                            button_html = f"""
-                            <button class="{button_class}" style="width: 100%;" onClick="go_to_question({q_index})">
-                                {btn_label}
-                            </button>
-                            """
-                            st.markdown(button_html, unsafe_allow_html=True)
+                            if st.button(btn_label, key=f"btn_{q_index}"):
+                                go_to_question(q_index)
+                                st.experimental_rerun()
+
 
     if not st.session_state.start:
         if st.button("Start Exam"):
