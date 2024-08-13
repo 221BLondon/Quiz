@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from pathlib import Path
-
+import math
 # Load questions from CSV file
 def load_questions(file_path):
     DATA_FILENAME = Path(__file__).parent / 'new.csv'
