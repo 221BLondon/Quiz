@@ -42,29 +42,30 @@ def main():
     # Sidebar for navigation and exam details
     with st.sidebar:
         st.header("Navigation")
-        
+
         if not st.session_state.start:
             if st.button("Start Exam"):
                 start_exam()
         else:
             st.button("Stop Exam", on_click=stop_exam)
-            
-            # Jump to Question
-            st.subheader("Jump to a Question")
-            for i in range(len(df)):
-                if st.session_state.answers[i] is not None:
-                    color = "green"
-                else:
-                    color = "red"
-                if st.button(f"Q{i + 1}", key=f"nav_{i}", help=f"Go to Question {i + 1}"):
-                    go_to_question(i)
-                
+
+            # Collapsible Jump to Question Section
+            with st.expander("Jump to a Question"):
+                cols = st.columns(8)
+                for i in range(len(df)):
+                    col = cols[i % 8]
+                    answered = st.session_state.answers[i] is not None
+                    button_color = "lightgreen" if answered else "lightcoral"
+                    button = col.button(f"Q{i + 1}", key=f"nav_{i}", help=f"Go to Question {i + 1}", on_click=go_to_question, args=(i,))
+                    if answered:
+                        st.markdown(f'<style>#{button.id} {{ background-color: {button_color}; }}</style>', unsafe_allow_html=True)
+
             # Detailed Results
             if st.session_state.start and st.button("Finish Exam"):
                 st.session_state.start = False
                 st.write(f"\nYou got {st.session_state.correct_count} out of {len(df)} questions right.")
                 st.write(f"Your score: {st.session_state.correct_count / len(df) * 100:.2f}%")
-                
+
                 # Show detailed results
                 st.subheader("Detailed Results")
                 for i, answer in enumerate(st.session_state.answers):
