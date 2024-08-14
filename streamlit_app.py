@@ -135,7 +135,7 @@ def main():
                 st.write(f"**Your Answer:** {answer}")
                 st.write(f"**Correct Answer:** {df.iloc[i]['Correct Answer']}")
                 st.write(f"**Explanation:** {df.iloc[i]['Explanation']}")
-        if not st.session_state.answers:
+        if all(answer is None for answer in st.session_state.answers):
             st.write(f"You haven't answered any question")
 
     # elif not st.session_state.start:
