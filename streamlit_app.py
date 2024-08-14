@@ -135,6 +135,7 @@ def main():
 
     if st.session_state.show_results:
         st.session_state.end = True
+    if st.session_state.end
         st.write("# Exam Details")
         st.write(f"You have answered {st.session_state.correct_count} out of {len(df)} questions correctly.")
         st.subheader(f"**Your score: {st.session_state.correct_count / len(df) * 100:.2f}%**")
