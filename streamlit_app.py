@@ -101,6 +101,7 @@ def main():
             if st.button("Start Exam"):
                 start_exam()
     else:
+        st.write('777')
         index = st.session_state.current_question_index
         row = df.iloc[index]
 
