@@ -135,6 +135,10 @@ def main():
         st.write("# Exam Details")
         st.write(f"You have answered {st.session_state.correct_count} out of {len(df)} questions correctly.")
         st.subheader(f"**Your score: {st.session_state.correct_count / len(df) * 100:.2f}%**")
+        if (st.session_state.correct_count / len(df) * 100:.2f) >= 75:
+            st.markdown(":green[Pass!]")
+        else:
+            st.markdown(":red[Fail!]")
 
         # Define the variables
         correct_answers = st.session_state.correct_count
