@@ -136,9 +136,9 @@ def main():
         st.write(f"You have answered {st.session_state.correct_count} out of {len(df)} questions correctly.")
         st.subheader(f"**Your score: {st.session_state.correct_count / len(df) * 100:.2f}%**")
         if (st.session_state.correct_count / len(df) * 100) >= 75:
-            st.markdown(":green[Pass!]")
+            st.header(":green[Pass!]")
         else:
-            st.markdown(":red[Fail!]")
+            st.header(":red[Fail!]")
 
         # Define the variables
         correct_answers = st.session_state.correct_count
