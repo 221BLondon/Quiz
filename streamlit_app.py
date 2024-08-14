@@ -135,6 +135,9 @@ def main():
                 st.write(f"**Your Answer:** {answer}")
                 st.write(f"**Correct Answer:** {df.iloc[i]['Correct Answer']}")
                 st.write(f"**Explanation:** {df.iloc[i]['Explanation']}")
+        if not st.session_state.answers:
+            st.write(f"You haven't answered any question")
+
     # elif not st.session_state.start:
     #     # Only show the "Start Exam" button if the exam has not started and hasn't ended
     #     if not st.session_state.end:
