@@ -67,6 +67,7 @@ def main():
         st.session_state.answers = [None] * len(df)
         st.session_state.correct_count = 0
         st.session_state.show_results = False
+        st.write('here')
 
     # Sidebar for navigation and restarting
     with st.sidebar:
@@ -94,7 +95,9 @@ def main():
 
 
     if not st.session_state.start:
+        st.write('22222')
         if not st.session_state.end:
+            st.write('3333')
             if st.button("Start Exam"):
                 start_exam()
     else:
@@ -137,6 +140,7 @@ def main():
     if st.session_state.show_results:
         st.session_state.end = True
     if st.session_state.end:
+        st.write('4444')
         st.write("# Exam Details")
         st.write(f"You have answered {st.session_state.correct_count} out of {len(df)} questions correctly.")
         st.subheader(f"**Your score: {st.session_state.correct_count / len(df) * 100:.2f}%**")
