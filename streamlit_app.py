@@ -138,49 +138,43 @@ def main():
         if not st.session_state.end:
             if st.button("Start Exam"):
                 start_exam()
-    # if not st.session_state.start:
-    #         st.write('22222')
-    #         if not st.session_state.end:
-    #             st.write('3333')
-    #             if st.button("Start Exam"):
-    #                 start_exam()
-        else:
-            st.write('777')
-            index = st.session_state.current_question_index
-            row = df.iloc[index]
+    else:
+        st.write('777')
+        index = st.session_state.current_question_index
+        row = df.iloc[index]
 
-            st.subheader(f"Question {row['Question Number']}")
-            st.write(row['Question'])
-            options = [row['Option A'], row['Option B'], row['Option C'], row['Option D']]
-            option_keys = ['A', 'B', 'C', 'D']
+        st.subheader(f"Question {row['Question Number']}")
+        st.write(row['Question'])
+        options = [row['Option A'], row['Option B'], row['Option C'], row['Option D']]
+        option_keys = ['A', 'B', 'C', 'D']
 
-            # Include a placeholder for no selection
-            options_with_placeholder = ["Select an option"] + options
-            option_keys_with_placeholder = [None] + option_keys
+        # Include a placeholder for no selection
+        options_with_placeholder = ["Select an option"] + options
+        option_keys_with_placeholder = [None] + option_keys
 
-            # Determine the index of the previous answer if it exists
-            previous_answer_key = st.session_state.answers[index]
-            previous_answer_index = option_keys_with_placeholder.index(previous_answer_key) if previous_answer_key and previous_answer_key in option_keys_with_placeholder else 0
+        # Determine the index of the previous answer if it exists
+        previous_answer_key = st.session_state.answers[index]
+        previous_answer_index = option_keys_with_placeholder.index(previous_answer_key) if previous_answer_key and previous_answer_key in option_keys_with_placeholder else 0
 
-            selected_answer = st.radio("Choose your answer:", options_with_placeholder, index=previous_answer_index)
+        selected_answer = st.radio("Choose your answer:", options_with_placeholder, index=previous_answer_index)
 
-            if st.button("Submit Answer"):
-                if selected_answer != "Select an option":
-                    selected_answer_key = option_keys_with_placeholder[options_with_placeholder.index(selected_answer)]
-                    handle_answer(selected_answer_key)
-                    correct_answer_key = row['Correct Answer']
-                    if selected_answer_key == correct_answer_key:
-                        st.success("Correct!")
-                    else:
-                        st.error(f"Wrong! The correct answer was {correct_answer_key}.")
-                        st.info(f"Explanation: {row['Explanation']}")
+        if st.button("Submit Answer"):
+            if selected_answer != "Select an option":
+                selected_answer_key = option_keys_with_placeholder[options_with_placeholder.index(selected_answer)]
+                handle_answer(selected_answer_key)
+                correct_answer_key = row['Correct Answer']
+                if selected_answer_key == correct_answer_key:
+                    st.success("Correct!")
                 else:
-                    st.warning("Please select an answer before submitting.")
+                    st.error(f"Wrong! The correct answer was {correct_answer_key}.")
+                    st.info(f"Explanation: {row['Explanation']}")
+            else:
+                st.warning("Please select an answer before submitting.")
 
-            # Navigation buttons
-            st.button("Previous", on_click=previous_question, disabled=st.session_state.current_question_index == 0)
-            st.button("Next", on_click=next_question, disabled=st.session_state.current_question_index == len(df) - 1)
-            st.button("Finish Exam", on_click=stop_exam)
+        # Navigation buttons
+        st.button("Previous", on_click=previous_question, disabled=st.session_state.current_question_index == 0)
+        st.button("Next", on_click=next_question, disabled=st.session_state.current_question_index == len(df) - 1)
+        st.button("Finish Exam", on_click=stop_exam)
 
         if st.session_state.show_results:
             st.session_state.end = True
