@@ -62,6 +62,7 @@ def main():
     # Initialize session state
     if 'start' not in st.session_state:
         st.session_state.start = False
+        st.session_state.end = False
         st.session_state.current_question_index = 0
         st.session_state.answers = [None] * len(df)
         st.session_state.correct_count = 0
