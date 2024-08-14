@@ -77,6 +77,7 @@ def main():
             st.button("Start Exam", on_click=start_exam)
         else:
             if st.session_state.start:
+                st.button("Finish Exam", on_click=stop_exam)
                 st.subheader("Jump to Question")
                 total_questions = len(df)
                 num_rows = math.ceil(total_questions / 8)
@@ -176,7 +177,6 @@ def main():
         # Navigation buttons
         st.button("Previous", on_click=previous_question, disabled=st.session_state.current_question_index == 0)
         st.button("Next", on_click=next_question, disabled=st.session_state.current_question_index == len(df) - 1)
-        st.button("Finish Exam", on_click=stop_exam)
 
 if __name__ == "__main__":
     main()
