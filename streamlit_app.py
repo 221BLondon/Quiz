@@ -93,9 +93,10 @@ def main():
                                 go_to_question(q_index)
 
 
-    if not st.session_state.start and not st.session_state.end:
-        if st.button("Start Exam"):
-            start_exam()
+    if not st.session_state.start:
+        if not st.session_state.end:
+            if st.button("Start Exam"):
+                start_exam()
     else:
         index = st.session_state.current_question_index
         row = df.iloc[index]
