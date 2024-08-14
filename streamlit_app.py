@@ -67,12 +67,14 @@ def main():
         st.session_state.answers = [None] * len(df)
         st.session_state.correct_count = 0
         st.session_state.show_results = False
-        st.write('here')
+        st.write('Go to sidebar and start exam')
 
     # Sidebar for navigation and restarting
     with st.sidebar:
         if st.session_state.show_results:
             st.button("Restart Exam", on_click=restart_exam)
+        elif not st.session_state.start:
+            st.button("Start Exam", on_click=start_exam)
         else:
             if st.session_state.start:
                 st.subheader("Jump to Question")
@@ -95,8 +97,7 @@ def main():
 
 
     
-    if st.session_state.end:
-        st.write('4444')
+    if st.session_state.show_results:
         st.write("# Exam Details")
         st.write(f"You have answered {st.session_state.correct_count} out of {len(df)} questions correctly.")
         st.subheader(f"**Your score: {st.session_state.correct_count / len(df) * 100:.2f}%**")
@@ -133,13 +134,14 @@ def main():
                 st.write(f"**Your Answer:** {answer}")
                 st.write(f"**Correct Answer:** {df.iloc[i]['Correct Answer']}")
                 st.write(f"**Explanation:** {df.iloc[i]['Explanation']}")
-    elif not st.session_state.start:
-        # Only show the "Start Exam" button if the exam has not started and hasn't ended
-        if not st.session_state.end:
-            if st.button("Start Exam"):
-                start_exam()
-    else:
-        st.write('777')
+    # elif not st.session_state.start:
+    #     # Only show the "Start Exam" button if the exam has not started and hasn't ended
+    #     if not st.session_state.end:
+    #         if st.button("Start Exam"):
+    #             start_exam()
+    elif st.session_state.show_results:
+        st.session_state.end = True
+    elif st.session_state.start:
         index = st.session_state.current_question_index
         row = df.iloc[index]
 
@@ -175,9 +177,6 @@ def main():
         st.button("Previous", on_click=previous_question, disabled=st.session_state.current_question_index == 0)
         st.button("Next", on_click=next_question, disabled=st.session_state.current_question_index == len(df) - 1)
         st.button("Finish Exam", on_click=stop_exam)
-
-        if st.session_state.show_results:
-            st.session_state.end = True
 
 if __name__ == "__main__":
     main()
