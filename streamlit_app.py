@@ -9,7 +9,7 @@ def previous_question():
         st.session_state.current_question_index -= 1
 
 def next_question():
-    if st.session_state.current_question_index < len(df) - 1:
+    if st.session_state.current_question_index < len(st.session_state.df) - 1:
         st.session_state.current_question_index += 1
 def go_to_question(index):
     st.session_state.current_question_index = index
@@ -18,24 +18,28 @@ def start_exam():
     st.session_state.start = True
     st.session_state.end = False
     st.session_state.current_question_index = 0
-    st.session_state.answers = [None] * len(df)
+    st.session_state.answers = [None] * len(st.session_state.df)
     st.session_state.correct_count = 0
     st.session_state.show_results = False
 
 def stop_exam():
+    get_correct_answers_count()
     st.session_state.start = False
     st.session_state.show_results = True
 
 def restart_exam():
     start_exam()
 
-def handle_answer(submitted_answer):
-    index = st.session_state.current_question_index
-    row = df.iloc[index]
-    correct_answer_key = row['Correct Answer']
-    if submitted_answer == correct_answer_key:
-        st.session_state.correct_count += 1
-    st.session_state.answers[index] = submitted_answer
+# def handle_answer(submitted_answer):
+#     index = st.session_state.current_question_index
+#     row = st.session_state.df.iloc[index]
+#     print(submitted_answer)
+#     correct_answer_key = row['Correct Answer']
+#     print(correct_answer_key)
+#     if submitted_answer == correct_answer_key:
+#         st.session_state.correct_count += 1
+#     st.session_state.answers[index] = submitted_answer
+#     print(st.session_state.answers)
 # Inject custom CSS to style the buttons in the sidebar
 st.markdown(
     """
@@ -52,25 +56,90 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+def on_submit(index,selected_answer, option_keys_with_placeholder, options_with_placeholder):
+    print(selected_answer, option_keys_with_placeholder, options_with_placeholder)
+    st.write(f"Selected Answer: {selected_answer}")
+    if selected_answer != "Select an option":
+        selected_answer_key = option_keys_with_placeholder[options_with_placeholder.index(selected_answer)]
+        correct_answer_key = st.session_state.df.iloc[st.session_state.current_question_index]['Correct Answer']
+        explanation = st.session_state.df.iloc[st.session_state.current_question_index]['Explanation']
+        handle_answer(selected_answer_key, correct_answer_key, explanation)
+        st.session_state.answers[index] = selected_answer_key 
+    else:
+        st.warning("Please select an answer before submitting.")
+
+def handle_answer(selected_answer_key, correct_answer_key, explanation):
+    if selected_answer_key == correct_answer_key:
+        st.success("Correct!")
+    else:
+        st.error(f"Wrong! The correct answer was {correct_answer_key}.")
+        st.info(f"Explanation: {explanation}")
 def main():
     st.title("Mock Exam")
+    if 'df' in st.session_state:
+        st.write(st.session_state.df.empty)
 
-    file_path = 'new.csv'  # Path to your CSV file
-    global df
-    df = load_questions(file_path)
+    # file_path = 'new.csv'  # Path to your CSV file
+    global uploaded_file
+    # df = load_questions(file_path)
 
     # Initialize session state
     if 'start' not in st.session_state:
         st.session_state.start = False
         st.session_state.end = False
         st.session_state.current_question_index = 0
-        st.session_state.answers = [None] * len(df)
+        st.session_state.df = pd.DataFrame()
         st.session_state.correct_count = 0
         st.session_state.show_results = False
+        st.session_state.triggered_by_dropdown = False
         st.write('Go to sidebar and start exam')
+    # Initialize session state for the dropdown
+    if 'dropdown_options' not in st.session_state:
+        st.session_state.dropdown_options = ["Default","Custom"]
+
 
     # Sidebar for navigation and restarting
     with st.sidebar:
+        print("is empty",st.session_state.df.empty)
+        # if st.session_state.df.empty:
+        # Add a file uploader that only accepts CSV files
+        uploaded_file = st.sidebar.file_uploader("Upload a CSV file", type="csv")
+
+        # Enable dropdown only if a file is uploaded
+        if uploaded_file is not None:
+            # Add the filename to the dropdown options if it's not already there
+            filename = uploaded_file.name
+            st.session_state.selected_file = uploaded_file.name
+            if filename not in st.session_state.dropdown_options:
+                st.session_state.dropdown_options.append(filename)
+                # st.experimental_rerun()  # Rerun the app to update the dropdown
+
+            # Enable the dropdown
+            selected_option = st.sidebar.selectbox(
+                "Select an option",
+                st.session_state.dropdown_options,
+                key="dropdown",  # Assign a key to track this widget
+                on_change=on_option_change,
+
+            )
+        else:
+            selected_option = st.sidebar.selectbox(
+                "Select an option",
+                ["Default"],
+                key="dropdown",  # Assign a key to track this widget
+                on_change=on_option_change,
+
+            )
+        # Trigger method when dropdown value changes
+        # Check if dropdown value has changed
+        # if st.session_state.get('triggered_by_dropdown', False):
+        #     on_option_change(selected_option)
+        #     st.session_state['triggered_by_dropdown'] = False  # Reset the trigger
+
+        # Update a state based on the dropdown selection and load the appropriate file
+        # if st.session_state.df.empty:
+
+            
         if st.session_state.show_results:
             st.button("Restart Exam", on_click=restart_exam)
         elif not st.session_state.start:
@@ -79,7 +148,7 @@ def main():
             if st.session_state.start:
                 st.button("Finish Exam", on_click=stop_exam)
                 st.subheader("Jump to Question")
-                total_questions = len(df)
+                total_questions = len(st.session_state.df)
                 num_rows = math.ceil(total_questions / 8)
 
                 for r in range(num_rows):
@@ -95,21 +164,21 @@ def main():
                         with cols[i]:
                             if st.button(btn_label, key=f"btn_{q_index}" ,type=f"{button_type}"):
                                 go_to_question(q_index)
-
+        
 
     
     if st.session_state.show_results:
         st.write("# Exam Details")
-        st.write(f"You have answered {st.session_state.correct_count} out of {len(df)} questions correctly.")
-        st.subheader(f"**Your score: {st.session_state.correct_count / len(df) * 100:.2f}%**")
-        if (st.session_state.correct_count / len(df) * 100) >= 75:
+        st.write(f"You have answered {st.session_state.correct_count} out of {len(st.session_state.df)} questions correctly.")
+        st.subheader(f"**Your score: {st.session_state.correct_count / len(st.session_state.df) * 100:.2f}%**")
+        if (st.session_state.correct_count / len(st.session_state.df) * 100) >= 75:
             st.header(":green[Pass!]")
         else:
             st.header(":red[Fail!]")
 
         # Define the variables
         correct_answers = st.session_state.correct_count
-        incorrect_answers = len(df) - correct_answers
+        incorrect_answers = len(st.session_state.df) - correct_answers
 
         # Create the pie chart data
         data = pd.DataFrame({
@@ -128,13 +197,27 @@ def main():
 
         st.altair_chart(pie_chart, use_container_width=True)
 
-        st.subheader("Detailed Results")
+        results = []
+
+        # Iterate through each answer
         for i, answer in enumerate(st.session_state.answers):
             if answer is not None:
-                st.write(f"**Question {i + 1}:** {df.iloc[i]['Question']}")
-                st.write(f"**Your Answer:** {answer}")
-                st.write(f"**Correct Answer:** {df.iloc[i]['Correct Answer']}")
-                st.write(f"**Explanation:** {df.iloc[i]['Explanation']}")
+                # Get the details of each question
+                question_row = st.session_state.df.iloc[i]
+                results.append({
+                    "Question Number": i + 1,
+                    "Question": question_row['Question'],
+                    "Your Answer": answer,
+                    "Correct Answer": question_row['Correct Answer'],
+                    "Explanation": question_row['Explanation']
+                })
+        
+        # Convert the list of results to a DataFrame
+        results_df = pd.DataFrame(results)
+
+        # Display the DataFrame as a table
+        st.subheader("Detailed Results")
+        st.table(results_df)  # Display the table
         if all(answer is None for answer in st.session_state.answers):
             st.write(f"You haven't answered any question")
 
@@ -146,7 +229,25 @@ def main():
     elif st.session_state.show_results:
         st.session_state.end = True
     elif st.session_state.start:
+        if st.session_state.start:
+            render_question()
+def render_question():
+    index = st.session_state.current_question_index
+        # Ensure the DataFrame exists in the session state
+    if 'df' not in st.session_state:
+        st.warning("DataFrame is not initialized. Please upload a file or load data.")
+        return
+
+    df = st.session_state.df
+    print(index,len(df))
+    # Ensure the index is valid
+    index = 0  # Example index; replace with your logic
+    if index >= len(df) or index < 0:
+        st.error("Invalid index. Please make sure you're accessing a valid row.")
+        return
+    if st.session_state.current_question_index>-1:
         index = st.session_state.current_question_index
+        # Access the row safely
         row = df.iloc[index]
 
         st.subheader(f"Question {row['Question Number']}")
@@ -164,22 +265,53 @@ def main():
 
         selected_answer = st.radio("Choose your answer:", options_with_placeholder, index=previous_answer_index)
 
-        if st.button("Submit Answer"):
-            if selected_answer != "Select an option":
-                selected_answer_key = option_keys_with_placeholder[options_with_placeholder.index(selected_answer)]
-                handle_answer(selected_answer_key)
-                correct_answer_key = row['Correct Answer']
-                if selected_answer_key == correct_answer_key:
-                    st.success("Correct!")
-                else:
-                    st.error(f"Wrong! The correct answer was {correct_answer_key}.")
-                    st.info(f"Explanation: {row['Explanation']}")
-            else:
-                st.warning("Please select an answer before submitting.")
-
+        st.button("Submit Answer",on_click=on_submit,args=(index,selected_answer, option_keys_with_placeholder, options_with_placeholder, ),key="on_submit_button")
         # Navigation buttons
-        st.button("Previous", on_click=previous_question, disabled=st.session_state.current_question_index == 0)
-        st.button("Next", on_click=next_question, disabled=st.session_state.current_question_index == len(df) - 1)
+        st.button("Previous", on_click=previous_question, disabled=st.session_state.current_question_index == 0,key="previous_question_button")
+        st.button("Next", on_click=next_question, disabled=st.session_state.current_question_index == len(df) - 1,key="next_question_button")
+# def on_submit(selected_answer,option_keys_with_placeholder,options_with_placeholder):
+    
+#     print("on_submit")
+#     if selected_answer != "Select an option":
+#         selected_answer_key = option_keys_with_placeholder[options_with_placeholder.index(selected_answer)]
+#         correct_answer_key = row['Correct Answer']
+#         explanation = row['Explanation']
+#         # Trigger the handle_answer function
+#         handle_answer(selected_answer_key, correct_answer_key, explanation)
+#     else:
+#         st.warning("Please select an answer before submitting.")
+def on_option_change():
+    selected_option = st.session_state['dropdown']
+    print(selected_option)
+    if selected_option == "Custom":
+        st.session_state.df = pd.read_csv(uploaded_file)
+        st.write(f"Using the uploaded file: {st.session_state.selected_file}")
+        print('aaaa')
+        st.session_state.answers = [None] * len(st.session_state.df)
+    elif selected_option == "Default":
+        st.session_state.selected_file = "Default"
+        st.session_state.df = load_questions('new.csv')  # Load the default file
+        st.write(f"Using the default file")
+        print("sdsadas")
+        st.session_state.answers = [None] * len(st.session_state.df)
+    else:
+        st.write("You selected another option")
+    st.session_state['triggered_by_dropdown'] = True
+def handle_answer(selected_answer_key, correct_answer_key, explanation):
+    if selected_answer_key == correct_answer_key:
+        st.success("Correct!")
+    else:
+        st.error(f"Wrong! The correct answer was {correct_answer_key}.")
+        st.info(f"Explanation: {explanation}")
+def get_correct_answers_count():
+    correct_count = 0
+    for i, answer in enumerate(st.session_state.answers):
+        if answer is not None:
+            correct_answer_key = st.session_state.df.iloc[i]['Correct Answer']
+            if answer == correct_answer_key:
+                correct_count += 1
+    st.session_state.correct_count = correct_count
+    return correct_count
 
 if __name__ == "__main__":
     main()
