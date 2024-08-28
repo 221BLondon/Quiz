@@ -76,8 +76,8 @@ def handle_answer(selected_answer_key, correct_answer_key, explanation):
         st.info(f"Explanation: {explanation}")
 def main():
     st.title("Mock Exam")
-    if 'df' in st.session_state:
-        st.write(st.session_state.df.empty)
+    # if 'df' in st.session_state:
+    #     st.write(st.session_state.df.empty)
 
     # file_path = 'new.csv'  # Path to your CSV file
     global uploaded_file
@@ -101,35 +101,45 @@ def main():
     # Sidebar for navigation and restarting
     with st.sidebar:
         print("is empty",st.session_state.df.empty)
-        # if st.session_state.df.empty:
-        # Add a file uploader that only accepts CSV files
-        uploaded_file = st.sidebar.file_uploader("Upload a CSV file", type="csv")
+        with st.expander('Custom Exam'):
+            st.write("You can upload your on mcq question answer as a csv file. You can download the sample csv file from below.")
+            with open("sample_mcq.csv", "rb") as file:
+                btn = st.download_button(
+                    label="Download Sample csv",
+                    data=file,
+                    file_name="sample_mcq.csv",
+                    mime="image/png",
+                )
+            # if st.session_state.df.empty:
+            # Add a file uploader that only accepts CSV files
+            uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
 
-        # Enable dropdown only if a file is uploaded
-        if uploaded_file is not None:
-            # Add the filename to the dropdown options if it's not already there
-            filename = uploaded_file.name
-            st.session_state.selected_file = uploaded_file.name
-            if filename not in st.session_state.dropdown_options:
-                st.session_state.dropdown_options.append(filename)
-                # st.experimental_rerun()  # Rerun the app to update the dropdown
+            # Enable dropdown only if a file is uploaded
+            if uploaded_file is not None:
+                # Add the filename to the dropdown options if it's not already there
+                filename = uploaded_file.name
+                st.session_state.selected_file = uploaded_file.name
+                # if filename not in st.session_state.dropdown_options:
+                #     st.session_state.dropdown_options.append(filename)
+                    # st.experimental_rerun()  # Rerun the app to update the dropdown
 
-            # Enable the dropdown
-            selected_option = st.sidebar.selectbox(
-                "Select an option",
-                st.session_state.dropdown_options,
-                key="dropdown",  # Assign a key to track this widget
-                on_change=on_option_change,
+                # Enable the dropdown
+                selected_option = st.sidebar.selectbox(
+                    "Select type of exam",
+                    st.session_state.dropdown_options,
+                    key="dropdown",  # Assign a key to track this widget
+                    on_change=on_option_change,
 
-            )
-        else:
-            selected_option = st.sidebar.selectbox(
-                "Select an option",
-                ["Default"],
-                key="dropdown",  # Assign a key to track this widget
-                on_change=on_option_change,
+                )
+            else:
+                selected_option = st.sidebar.selectbox(
+                    "Select type of exam",
+                    ["Default"],
+                    key="dropdown",  # Assign a key to track this widget
+                    on_change=on_option_change,
+                    disabled=True
 
-            )
+                )
         # Trigger method when dropdown value changes
         # Check if dropdown value has changed
         # if st.session_state.get('triggered_by_dropdown', False):
