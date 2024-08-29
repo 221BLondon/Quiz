@@ -15,6 +15,7 @@ def go_to_question(index):
     st.session_state.current_question_index = index
 
 def start_exam():
+    on_option_change()
     st.session_state.start = True
     st.session_state.end = False
     st.session_state.current_question_index = 0
@@ -74,6 +75,8 @@ def handle_answer(selected_answer_key, correct_answer_key, explanation):
     else:
         st.error(f"Wrong! The correct answer was {correct_answer_key}.")
         st.info(f"Explanation: {explanation}")
+def updatePassPercentage():
+    st.session_state.passing_percentage=st.session_state.percentage
 def main():
     st.title("Mock Exam")
     # if 'df' in st.session_state:
@@ -81,6 +84,9 @@ def main():
 
     # file_path = 'new.csv'  # Path to your CSV file
     global uploaded_file
+    if 'passing_percentage' not in st.session_state:
+        st.session_state.passing_percentage=75
+
     # df = load_questions(file_path)
 
     # Initialize session state
@@ -92,6 +98,7 @@ def main():
         st.session_state.correct_count = 0
         st.session_state.show_results = False
         st.session_state.triggered_by_dropdown = False
+        st.write('You can practice mcq exams here; there are four possible answers for each question. Your customized question answers can be uploaded as a CSV file in the same format as the sample CSV file. For using the uploaded question-based exam, you need to choose the custom option from the dropdown menu.')
         st.write('Go to sidebar and start exam')
     # Initialize session state for the dropdown
     if 'dropdown_options' not in st.session_state:
@@ -112,8 +119,9 @@ def main():
                 )
             # if st.session_state.df.empty:
             # Add a file uploader that only accepts CSV files
-            uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
-
+            uploaded_file = st.file_uploader("Upload a CSV file", type="csv",disabled=st.session_state.start)
+            if st.session_state.start:
+                st.write('You cannot upload a file while exam in progress,Please finish current exam.')
             # Enable dropdown only if a file is uploaded
             if uploaded_file is not None:
                 # Add the filename to the dropdown options if it's not already there
@@ -149,7 +157,9 @@ def main():
         # Update a state based on the dropdown selection and load the appropriate file
         # if st.session_state.df.empty:
 
-            
+        st.number_input("Pass percentage",help="Enter the precentage of answer need to pass the exam in between 0-100",min_value=0,max_value=100,step=1,value=st.session_state.passing_percentage,key="percentage",on_change=updatePassPercentage)
+        # st.number_input("Insert a number",0,100,value=75,step=1,on_change=updatePassPercentage,args=(st.session_state.passing_percentage),key="passing_percentage")
+        st.write(st.session_state.passing_percentage)
         if st.session_state.show_results:
             st.button("Restart Exam", on_click=restart_exam)
         elif not st.session_state.start:
@@ -181,7 +191,7 @@ def main():
         st.write("# Exam Details")
         st.write(f"You have answered {st.session_state.correct_count} out of {len(st.session_state.df)} questions correctly.")
         st.subheader(f"**Your score: {st.session_state.correct_count / len(st.session_state.df) * 100:.2f}%**")
-        if (st.session_state.correct_count / len(st.session_state.df) * 100) >= 75:
+        if (st.session_state.correct_count / len(st.session_state.df) * 100) >= st.session_state.passing_percentage:
             st.header(":green[Pass!]")
         else:
             st.header(":red[Fail!]")
@@ -300,7 +310,7 @@ def on_option_change():
         st.session_state.answers = [None] * len(st.session_state.df)
     elif selected_option == "Default":
         st.session_state.selected_file = "Default"
-        st.session_state.df = load_questions('new.csv')  # Load the default file
+        st.session_state.df = load_questions('smc.csv')  # Load the default file
         st.write(f"Using the default file")
         print("sdsadas")
         st.session_state.answers = [None] * len(st.session_state.df)
