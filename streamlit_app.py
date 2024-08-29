@@ -137,6 +137,7 @@ def main():
                     st.session_state.dropdown_options,
                     key="dropdown",  # Assign a key to track this widget
                     on_change=on_option_change,
+                    disabled=st.session_state.start
 
                 )
             else:
@@ -168,33 +169,45 @@ def main():
             if st.session_state.start:
                 st.button("Finish Exam", on_click=stop_exam)
                 st.subheader("Jump to Question")
-                total_questions = len(st.session_state.df)
-                num_rows = math.ceil(total_questions / 8)
+                with st.container(border=True,height=300):
+                    total_questions = len(st.session_state.df)
+                    num_rows = math.ceil(total_questions / 8)
 
-                for r in range(num_rows):
-                    cols = st.columns(8)
-                    for i in range(8):
-                        q_index = r * 8 + i
-                        if q_index >= total_questions:
-                            break
-                
-                        btn_label = str(q_index + 1)
-                        button_type = 'primary' if st.session_state.answers[q_index] is not None else 'secondary'
-                
-                        with cols[i]:
-                            if st.button(btn_label, key=f"btn_{q_index}" ,type=f"{button_type}"):
-                                go_to_question(q_index)
+                    for r in range(num_rows):
+                        cols = st.columns(8)
+                        for i in range(8):
+                            q_index = r * 8 + i
+                            if q_index >= total_questions:
+                                break
+                    
+                            btn_label = str(q_index + 1)
+                            button_type = 'primary' if st.session_state.answers[q_index] is not None else 'secondary'
+                    
+                            with cols[i]:
+                                if st.button(btn_label, key=f"btn_{q_index}" ,type=f"{button_type}"):
+                                    go_to_question(q_index)
         
 
     
     if st.session_state.show_results:
-        st.write("# Exam Details")
-        st.write(f"You have answered {st.session_state.correct_count} out of {len(st.session_state.df)} questions correctly.")
-        st.subheader(f"**Your score: {st.session_state.correct_count / len(st.session_state.df) * 100:.2f}%**")
-        if (st.session_state.correct_count / len(st.session_state.df) * 100) >= st.session_state.passing_percentage:
-            st.header(":green[Pass!]")
+        # st.write("## Exam Summary")
+
+        # Calculate the score percentage
+        score_percentage = st.session_state.correct_count / len(st.session_state.df) * 100
+
+        # Set the color based on whether the user passed or failed
+        score_color = "green" if score_percentage >= st.session_state.passing_percentage else "red"
+
+        # Display the score with color
+        st.subheader(f"**Exam Summary | You Scored :{score_color}[{score_percentage:.2f}%]**")
+
+        if score_percentage >= st.session_state.passing_percentage:
+            st.subheader(":green[Congratulations! You've Passed!]")
         else:
-            st.header(":red[Fail!]")
+            st.subheader(":red[Unfortunately, You Did Not Pass]")
+            st.write(f":exclamation: You needed at least {st.session_state.passing_percentage}% to pass.")
+
+        st.write(f":memo: You answered {st.session_state.correct_count} out of {len(st.session_state.df)} questions correctly.")
 
         # Define the variables
         correct_answers = st.session_state.correct_count
@@ -234,12 +247,26 @@ def main():
         
         # Convert the list of results to a DataFrame
         results_df = pd.DataFrame(results)
+        if 'Your Answer' in results_df.columns and 'Correct Answer' in results_df.columns:
+            incorrect_df = results_df[results_df['Your Answer'] != results_df['Correct Answer']]
+            correct_df = results_df[results_df['Your Answer'] == results_df['Correct Answer']]
 
         # Display the DataFrame as a table
         st.subheader("Detailed Results")
-        st.table(results_df)  # Display the table
         if all(answer is None for answer in st.session_state.answers):
             st.write(f"You haven't answered any question")
+        else:
+            tab1, tab2, tab3= st.tabs(["Wrong","Correct","All"])
+            with tab1:
+                st.header("Incorrect Answers")
+                st.table(incorrect_df)  # Display the table
+            with tab2:
+                st.header("Correct Answers")
+                st.table(correct_df)  # Display the table
+            with tab3:
+                st.header("All")
+                st.table(results_df)  # Display the table
+
 
     # elif not st.session_state.start:
     #     # Only show the "Start Exam" button if the exam has not started and hasn't ended
