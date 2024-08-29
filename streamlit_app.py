@@ -19,7 +19,9 @@ def start_exam():
     st.session_state.start = True
     st.session_state.end = False
     st.session_state.current_question_index = 0
-    st.session_state.answers = [None] * len(st.session_state.df)
+    # st.session_state.answers = [None] * len(st.session_state.df)
+    # Initialize 'Your Answer' column in the DataFrame
+    st.session_state.df['Your Answer'] = None
     st.session_state.correct_count = 0
     st.session_state.show_results = False
 
@@ -64,19 +66,38 @@ def on_submit(index,selected_answer, option_keys_with_placeholder, options_with_
         selected_answer_key = option_keys_with_placeholder[options_with_placeholder.index(selected_answer)]
         correct_answer_key = st.session_state.df.iloc[st.session_state.current_question_index]['Correct Answer']
         explanation = st.session_state.df.iloc[st.session_state.current_question_index]['Explanation']
-        handle_answer(selected_answer_key, correct_answer_key, explanation)
-        st.session_state.answers[index] = selected_answer_key 
+        correct = handle_answer(selected_answer_key, correct_answer_key, explanation)
+        print(correct)
+        # st.session_state.answers[index] = selected_answer_key
+        st.session_state.df.at[index, 'Your Answer'] = selected_answer_key 
+        if correct:
+            print("here")
+            next_question()
     else:
         st.warning("Please select an answer before submitting.")
 
 def handle_answer(selected_answer_key, correct_answer_key, explanation):
     if selected_answer_key == correct_answer_key:
         st.success("Correct!")
+        return True
     else:
         st.error(f"Wrong! The correct answer was {correct_answer_key}.")
         st.info(f"Explanation: {explanation}")
+        return False
 def updatePassPercentage():
     st.session_state.passing_percentage=st.session_state.percentage
+def getAnswerText(row,option):
+    if option=='A':
+        return option+") "+row['Option A']
+    elif option=='B':
+        return option+") "+row['Option B']
+    elif option=='C':
+        return option+") "+row['Option C']
+    elif option=='D':
+        return option+") "+row['Option D']
+    else:
+        return '';
+
 def main():
     st.title("Mock Exam")
     # if 'df' in st.session_state:
@@ -233,15 +254,16 @@ def main():
         results = []
 
         # Iterate through each answer
-        for i, answer in enumerate(st.session_state.answers):
-            if answer is not None:
+        st.write(st.session_state.df)
+        for i, question_row in st.session_state.df.iterrows():
+            if question_row['Your Answer'] is not None:
                 # Get the details of each question
                 question_row = st.session_state.df.iloc[i]
                 results.append({
                     "Question Number": i + 1,
                     "Question": question_row['Question'],
-                    "Your Answer": answer,
-                    "Correct Answer": question_row['Correct Answer'],
+                    "Your Answer": getAnswerText(question_row,question_row['Your Answer']),
+                    "Correct Answer": getAnswerText(question_row,question_row['Correct Answer']),
                     "Explanation": question_row['Explanation']
                 })
         
@@ -253,16 +275,23 @@ def main():
 
         # Display the DataFrame as a table
         st.subheader("Detailed Results")
-        if all(answer is None for answer in st.session_state.answers):
-            st.write(f"You haven't answered any question")
+        if all(answer is None for answer in st.session_state.df['Your Answer']):
+            st.write("You haven't answered any question.")
+            return
         else:
             tab1, tab2, tab3= st.tabs(["Wrong","Correct","All"])
             with tab1:
                 st.header("Incorrect Answers")
-                st.table(incorrect_df)  # Display the table
+                if incorrect_df:
+                    st.table(incorrect_df)  # Display the table
+                else:
+                    st.write('No data available')
             with tab2:
                 st.header("Correct Answers")
-                st.table(correct_df)  # Display the table
+                if correct_df:
+                    st.table(correct_df)  # Display the table
+                else:
+                    st.write('No data available')
             with tab3:
                 st.header("All")
                 st.table(results_df)  # Display the table
@@ -344,19 +373,21 @@ def on_option_change():
     else:
         st.write("You selected another option")
     st.session_state['triggered_by_dropdown'] = True
-def handle_answer(selected_answer_key, correct_answer_key, explanation):
-    if selected_answer_key == correct_answer_key:
-        st.success("Correct!")
-    else:
-        st.error(f"Wrong! The correct answer was {correct_answer_key}.")
-        st.info(f"Explanation: {explanation}")
+# def get_correct_answers_count():
+#     correct_count = 0
+#     for i, answer in enumerate(st.session_state.answers):
+#         if answer is not None:
+#             correct_answer_key = st.session_state.df.iloc[i]['Correct Answer']
+#             if answer == correct_answer_key:
+#                 correct_count += 1
+#     st.session_state.correct_count = correct_count
+#     return correct_count
 def get_correct_answers_count():
     correct_count = 0
-    for i, answer in enumerate(st.session_state.answers):
-        if answer is not None:
-            correct_answer_key = st.session_state.df.iloc[i]['Correct Answer']
-            if answer == correct_answer_key:
-                correct_count += 1
+    df = st.session_state.df
+    for i in range(len(df)):
+        if df.at[i, 'Your Answer'] == df.at[i, 'Correct Answer']:
+            correct_count += 1
     st.session_state.correct_count = correct_count
     return correct_count
 
