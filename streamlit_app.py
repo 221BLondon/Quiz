@@ -4,6 +4,8 @@ import math
 from pathlib import Path
 from question_loader import load_questions
 import altair as alt
+
+
 def previous_question():
     if st.session_state.current_question_index > 0:
         st.session_state.current_question_index -= 1
@@ -31,6 +33,7 @@ def stop_exam():
     st.session_state.show_results = True
 
 def restart_exam():
+    update_Default_Values()
     start_exam()
 
 # def handle_answer(submitted_answer):
@@ -88,18 +91,19 @@ def updatePassPercentage():
     st.session_state.passing_percentage=st.session_state.percentage
 def getAnswerText(row,option):
     if option=='A':
-        return option+") "+row['Option A']
+        return option+") "+row[st.session_state.optA]
     elif option=='B':
-        return option+") "+row['Option B']
+        return option+") "+row[st.session_state.optB]
     elif option=='C':
-        return option+") "+row['Option C']
+        return option+") "+row[st.session_state.optC]
     elif option=='D':
-        return option+") "+row['Option D']
+        return option+") "+row[st.session_state.optD]
     else:
         return '';
 
 def main():
     st.title("Mock Exam")
+    update_Default_Values()
     # if 'df' in st.session_state:
     #     st.write(st.session_state.df.empty)
 
@@ -144,6 +148,8 @@ def main():
             if st.session_state.start:
                 st.write('You cannot upload a file while exam in progress,Please finish current exam.')
             # Enable dropdown only if a file is uploaded
+            if uploaded_file:
+                print()
             if uploaded_file is not None:
                 # Add the filename to the dropdown options if it's not already there
                 filename = uploaded_file.name
@@ -201,8 +207,10 @@ def main():
                             if q_index >= total_questions:
                                 break
                     
+                            answer_value = st.session_state.df.at[q_index,'Your Answer'] if st.session_state.df.at[q_index,'Your Answer'] is not None else 0
                             btn_label = str(q_index + 1)
-                            button_type = 'primary' if st.session_state.answers[q_index] is not None else 'secondary'
+                            # btn_label = str(q_index + 1) + ' ' + str(answer_value)
+                            button_type = 'primary' if st.session_state.df.at[q_index, 'Your Answer'] is not None else 'secondary'
                     
                             with cols[i]:
                                 if st.button(btn_label, key=f"btn_{q_index}" ,type=f"{button_type}"):
@@ -261,10 +269,10 @@ def main():
                 question_row = st.session_state.df.iloc[i]
                 results.append({
                     "Question Number": i + 1,
-                    "Question": question_row['Question'],
+                    "Question": question_row[st.session_state.quest],
                     "Your Answer": getAnswerText(question_row,question_row['Your Answer']),
                     "Correct Answer": getAnswerText(question_row,question_row['Correct Answer']),
-                    "Explanation": question_row['Explanation']
+                    "Explanation": question_row[st.session_state.explain]
                 })
         
         # Convert the list of results to a DataFrame
@@ -282,16 +290,16 @@ def main():
             tab1, tab2, tab3= st.tabs(["Wrong","Correct","All"])
             with tab1:
                 st.header("Incorrect Answers")
-                if incorrect_df:
-                    st.table(incorrect_df)  # Display the table
-                else:
+                if incorrect_df.empty:
                     st.write('No data available')
+                else:
+                    st.table(incorrect_df)  # Display the table
             with tab2:
                 st.header("Correct Answers")
-                if correct_df:
-                    st.table(correct_df)  # Display the table
-                else:
+                if correct_df.empty:
                     st.write('No data available')
+                else:
+                    st.table(correct_df)  # Display the table
             with tab3:
                 st.header("All")
                 st.table(results_df)  # Display the table
@@ -327,8 +335,8 @@ def render_question():
         row = df.iloc[index]
 
         st.subheader(f"Question {row['Question Number']}")
-        st.write(row['Question'])
-        options = [row['Option A'], row['Option B'], row['Option C'], row['Option D']]
+        st.write(row[st.session_state.quest])
+        options = [row[st.session_state.optA], row[st.session_state.optB], row[st.session_state.optC], row[st.session_state.optD]]
         option_keys = ['A', 'B', 'C', 'D']
 
         # Include a placeholder for no selection
@@ -363,12 +371,14 @@ def on_option_change():
         st.session_state.df = pd.read_csv(uploaded_file)
         st.write(f"Using the uploaded file: {st.session_state.selected_file}")
         print('aaaa')
+        vote('X')
         st.session_state.answers = [None] * len(st.session_state.df)
     elif selected_option == "Default":
         st.session_state.selected_file = "Default"
         st.session_state.df = load_questions('smc.csv')  # Load the default file
         st.write(f"Using the default file")
         print("sdsadas")
+        update_Default_Values()
         st.session_state.answers = [None] * len(st.session_state.df)
     else:
         st.write("You selected another option")
@@ -390,7 +400,35 @@ def get_correct_answers_count():
             correct_count += 1
     st.session_state.correct_count = correct_count
     return correct_count
+@st.dialog("Cast your vote")
+def vote(item):
+    st.write(f"Update the format")
+    # reason = st.text_input("Because...")
+    df = st.session_state.df
+    columns = df.columns
+    print(columns)
+    selected_option = st.sidebar.selectbox(
+        "Question",
+        columns,
+        key="q1",  # Assign a key to track this widget
+        on_change=on_option_assign,
+        args=(1),
+        disabled=st.session_state.start
 
+    )
+    if st.button("Submit"):
+        st.session_state.vote = {"item": item, "reason": 'sds'}
+        st.rerun()
+def on_option_assign(id):
+    selected_option = st.session_state['q1']
+    print(id,selected_option)
+def update_Default_Values():
+    st.session_state.optA = 'Option A'
+    st.session_state.optB = 'Option B'
+    st.session_state.optC = 'Option C'
+    st.session_state.optD = 'Option D'
+    st.session_state.quest = 'Question'
+    st.session_state.explain = 'Explanation'
 if __name__ == "__main__":
     main()
 
