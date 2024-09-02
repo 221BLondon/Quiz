@@ -113,7 +113,9 @@ def main():
         st.session_state.passing_percentage=75
 
     # df = load_questions(file_path)
-
+    # Initialize session state for modal visibility
+    if 'show_dialog' not in st.session_state:
+        st.session_state.show_dialog = False
     # Initialize session state
     if 'start' not in st.session_state:
         st.session_state.start = False
@@ -371,8 +373,8 @@ def on_option_change():
         st.session_state.df = pd.read_csv(uploaded_file)
         st.write(f"Using the uploaded file: {st.session_state.selected_file}")
         print('aaaa')
-        vote('X')
         st.session_state.answers = [None] * len(st.session_state.df)
+        vote('X')
     elif selected_option == "Default":
         st.session_state.selected_file = "Default"
         st.session_state.df = load_questions('smc.csv')  # Load the default file
@@ -400,28 +402,77 @@ def get_correct_answers_count():
             correct_count += 1
     st.session_state.correct_count = correct_count
     return correct_count
-@st.dialog("Cast your vote")
-def vote(item):
-    st.write(f"Update the format")
-    # reason = st.text_input("Because...")
-    df = st.session_state.df
-    columns = df.columns
-    print(columns)
-    selected_option = st.sidebar.selectbox(
-        "Question",
-        columns,
-        key="q1",  # Assign a key to track this widget
-        on_change=on_option_assign,
-        args=(1),
-        disabled=st.session_state.start
 
-    )
-    if st.button("Submit"):
-        st.session_state.vote = {"item": item, "reason": 'sds'}
-        st.rerun()
-def on_option_assign(id):
+
+# Function to open the dialog
+def open_dialog():
+    st.session_state.show_dialog = True
+
+# Function to close the dialog
+def close_dialog():
+    st.session_state.show_dialog = False
+if st.session_state.show_dialog:
+    @st.dialog("Option Handler")
+    def vote(item):
+        st.write(f"Update the format")
+        # reason = st.text_input("Because...")
+        df = st.session_state.df
+        columns = df.columns
+        print(columns)
+        st.selectbox(
+            "Question",
+            columns,
+            key="q1",  # Assign a key to track this widget
+            on_change=on_option_assign,
+            disabled=st.session_state.start
+        )
+        st.selectbox(
+            "Option A",
+            columns,
+            key="opt1",  # Assign a key to track this widget
+            on_change=on_option_assign,
+            disabled=st.session_state.start
+        )
+        st.selectbox(
+            "Option B",
+            columns,
+            key="opt2",  # Assign a key to track this widget
+            on_change=on_option_assign,
+            disabled=st.session_state.start
+        )
+        st.selectbox(
+            "Option c",
+            columns,
+            key="opt3",  # Assign a key to track this widget
+            on_change=on_option_assign,
+            disabled=st.session_state.start
+        )
+        st.selectbox(
+            "Option D",
+            columns,
+            key="opt4",  # Assign a key to track this widget
+            on_change=on_option_assign,
+            disabled=st.session_state.start
+        )
+        st.selectbox(
+            "Explanation",
+            columns,
+            key="exp",  # Assign a key to track this widget
+            on_change=on_option_assign,
+            disabled=st.session_state.start
+        )
+        if st.button("Save options"):
+            # st.session_state.vote = {"item": item, "reason": 'sds'}
+            # st.rerun()
+            st.session_state.optA = st.session_state['q1']
+            st.session_state.optB = st.session_state['opt1']
+            st.session_state.optC = st.session_state['opt2']
+            st.session_state.optD = st.session_state['opt3']
+            st.session_state.quest = st.session_state['opt4']
+            st.session_state.explain = st.session_state['exp']
+def on_option_assign():
     selected_option = st.session_state['q1']
-    print(id,selected_option)
+    print(selected_option)
 def update_Default_Values():
     st.session_state.optA = 'Option A'
     st.session_state.optB = 'Option B'
